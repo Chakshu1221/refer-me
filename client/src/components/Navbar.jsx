@@ -18,6 +18,7 @@ export default function Navbar() {
   if (!session) return null;
 
   const doSignOut = async () => {
+    setOpen(false);
     await signOut();
     navigate('/login');
   };
@@ -33,6 +34,7 @@ export default function Navbar() {
           Refer<span>Me!</span>
         </NavLink>
 
+        {/* desktop links */}
         <div className="nav-links">
           {LINKS.map((l) => (
             <NavLink key={l.to} to={l.to} className={({ isActive }) => (isActive ? 'active' : '')}>
@@ -48,14 +50,17 @@ export default function Navbar() {
             ? <img className="nav-avatar" src={profile.avatar_url} alt="me" onClick={() => navigate('/profile')} title="Profile" />
             : <div className="nav-avatar" onClick={() => navigate('/profile')} title="Profile">{initials}</div>}
 
+          {/* desktop-only sign out (hidden on mobile via responsive.css) */}
           <button className="nav-signout" onClick={doSignOut}>Sign out</button>
 
+          {/* mobile menu toggle */}
           <button className="nav-burger" onClick={() => setOpen((o) => !o)} aria-label="Menu">
             {open ? '✕' : '☰'}
           </button>
         </div>
       </div>
 
+      {/* mobile dropdown */}
       <div className={`nav-mobile ${open ? 'open' : ''}`}>
         {LINKS.map((l) => (
           <NavLink
@@ -66,6 +71,8 @@ export default function Navbar() {
             {l.label}
           </NavLink>
         ))}
+        <NavLink to="/profile" onClick={() => setOpen(false)}>My Profile</NavLink>
+        <a className="nav-mobile-signout" onClick={doSignOut}>Sign out</a>
       </div>
     </nav>
   );
