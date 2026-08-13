@@ -1,53 +1,137 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api } from '../lib/api.js';
+import './css/app.css';
 
 export default function Dashboard() {
   const { profile } = useAuth();
   const [mine, setMine] = useState([]);
+  const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.myRequests().then(setMine).finally(() => setLoading(false));
+    Promise.all([
+      api.myRequests().catch(() => []),
+      api.myOffers().catch(() => []),
+    ]).then(([r, o]) => {
+      setMine(r || []);
+      setOffers(o || []);
+    }).finally(() => setLoading(false));
   }, []);
 
+  const stats = useMemo(() => {
+    const open = mine.filter((r) => r.status === 'open').length;
+    const fulfilled = mine.filter((r) => r.status === 'fulfilled').length;
+    const approvedOffers = offers.filter((o) => o.status === 'approved').length;
+    return { total: mine.length, open, fulfilled, approvedOffers };
+  }, [mine, offers]);
+
+  const firstName = profile?.full_name?.split(' ')[0] || 'there';
+  const recent = mine.slice(0, 4);
+
   return (
-    <div className="container">
-      <div className="row" style={{ justifyContent: 'space-between' }}>
-        <div>
-          <h2 style={{ marginBottom: 4 }}>Hi {profile?.full_name?.split(' ')[0] || 'there'} 👋</h2>
-          <p className="hint" style={{ marginTop: 0 }}>
-            {profile?.current_company} · Trust score {profile?.trust_score}
-            {profile?.is_premium && <span className="badge premium" style={{ marginLeft: 8 }}>PREMIUM</span>}
-          </p>
+    <div className="page">
+      {/* HERO */}
+      <div className="dash-hero">
+        <div className="dash-hero-row">
+          <div className="dash-hi">
+            <h1>
+              Hi {firstName} 👋
+              {profile?.is_premium && <span className="dash-badge">💎 PREMIUM</span>}
+            </h1>
+            <p>
+              {profile?.role_title ? `${profile.role_title} · ` : ''}
+              {profile?.current_company || 'Welcome back'} · Trust score {profile?.trust_score ?? 100}
+            </p>
+          </div>
+          <div className="dash-rp-big">
+            <span className="ic">⚡</span>
+            <div>
+              <b>{profile?.rp_balance ?? 0}</b>
+              <span>Referral Points</span>
+            </div>
+          </div>
         </div>
-        <span className="rp-pill" style={{ fontSize: 16 }}>⚡ {profile?.rp_balance} RP</span>
       </div>
 
-      <div className="grid" style={{ gridTemplateColumns: '1fr 1fr', marginTop: 16 }}>
-        <Link to="/browse" className="card" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <h3>🔎 Give a referral</h3>
-          <p className="meta">Browse open requests, refer someone, upload proof and earn RP.</p>
+      {/* STATS */}
+      <div className="stat-grid">
+        <div className="stat">
+          <div className="ic i1">📨</div>
+          <b>{loading ? '—' : stats.total}</b>
+          <span>Requests posted</span>
+        </div>
+        <div className="stat">
+          <div className="ic i2">🟢</div>
+          <b>{loading ? '—' : stats.open}</b>
+          <span>Currently open</span>
+        </div>
+        <div className="stat">
+          <div className="ic i3">🎯</div>
+          <b>{loading ? '—' : stats.fulfilled}</b>
+          <span>Fulfilled</span>
+        </div>
+        <div className="stat">
+          <div className="ic i4">🤝</div>
+          <b>{loading ? '—' : stats.approvedOffers}</b>
+          <span>Referrals given</span>
+        </div>
+      </div>
+
+      {/* QUICK ACTIONS */}
+      <div className="action-grid">
+        <Link to="/browse" className="action-card a-give">
+          <span className="big">🔎</span>
+          <div>
+            <h3>Give a referral</h3>
+            <p>Browse open requests, refer someone at your company, upload proof and earn RP.</p>
+          </div>
+          <span className="arrow">→</span>
         </Link>
-        <Link to="/create" className="card" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <h3>🙋 Ask for a referral</h3>
-          <p className="meta">Post a role you want. Spend RP only when you approve a referral.</p>
+        <Link to="/create" className="action-card a-ask">
+          <span className="big">🙋</span>
+          <div>
+            <h3>Ask for a referral</h3>
+            <p>Post a role you want. You only spend RP when you approve a valid referral.</p>
+          </div>
+          <span className="arrow">→</span>
         </Link>
       </div>
 
-      <h3 style={{ marginTop: 24 }}>My requests</h3>
-      {loading ? <p className="hint">Loading…</p> : mine.length === 0 ? (
-        <p className="hint">No requests yet. <Link to="/create">Create one →</Link></p>
+      {/* MY REQUESTS */}
+      <div className="section-title">
+        <h2>My requests</h2>
+        {mine.length > 0 && <Link to="/create">+ New request</Link>}
+      </div>
+
+      {loading ? (
+        <div className="req-grid">
+          <div className="skeleton sk-card" />
+          <div className="skeleton sk-card" />
+        </div>
+      ) : recent.length === 0 ? (
+        <div className="empty">
+          <div className="em">📭</div>
+          <h3>No requests yet</h3>
+          <p>Post your first referral request and let the community help you.</p>
+          <Link to="/create" className="btn-cta">🙋 Ask for a referral</Link>
+        </div>
       ) : (
-        <div className="grid">
-          {mine.map((r) => (
-            <Link to={`/request/${r.id}`} key={r.id} className="card" style={{ color: 'inherit' }}>
-              <div className="row" style={{ justifyContent: 'space-between' }}>
-                <h3 style={{ margin: 0 }}>{r.role_title}</h3>
-                <span className={`badge ${r.status}`}>{r.status}</span>
+        <div className="req-grid">
+          {recent.map((r) => (
+            <Link to={`/request/${r.id}`} key={r.id} className="req-card">
+              <div className="req-top">
+                <h3>{r.role_title}</h3>
+                <span className={`chip ${r.status}`}>{r.status}</span>
               </div>
-              <p className="meta">{r.company_name} · {r.rp_cost} RP</p>
+              <p className="req-company">🏢 {r.company_name}</p>
+              <div className="req-foot">
+                <span className="req-rp">⚡ {r.rp_cost} RP</span>
+                <span className="req-meta">
+                  {new Date(r.created_at).toLocaleDateString()}
+                </span>
+              </div>
             </Link>
           ))}
         </div>

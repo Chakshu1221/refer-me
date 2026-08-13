@@ -1,0 +1,155 @@
+/* ============================================================
+   PROFILE SETUP SCREEN — premium, responsive
+   Reuses the split-screen shell from auth.css.
+   ============================================================ */
+
+/* right panel gets a scrollable, roomier card here */
+.setup-panel {
+  display: flex; align-items: center; justify-content: center;
+  padding: 32px 20px;
+  background:
+    radial-gradient(700px 500px at 50% -10%, #eef2ff, transparent 70%),
+    var(--bg);
+}
+.setup-card {
+  width: 100%; max-width: 520px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  padding: 34px 32px;
+  box-shadow: 0 30px 60px -20px rgba(30, 27, 75, .25);
+  animation: cardIn .5s cubic-bezier(.2,.7,.3,1) both;
+}
+
+/* avatar uploader */
+.setup-avatar {
+  display: flex; align-items: center; gap: 16px;
+  padding: 16px; border-radius: 16px;
+  background: #f8fafc; border: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.avatar-ring {
+  position: relative;
+  width: 72px; height: 72px; flex: 0 0 auto;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(135deg, #7c6cff, #f59e0b);
+}
+.avatar-ring img,
+.avatar-ring .ph {
+  width: 100%; height: 100%; border-radius: 50%;
+  object-fit: cover; display: grid; place-items: center;
+  background: #eef2ff; color: var(--primary);
+  font-size: 26px; font-weight: 800;
+}
+.avatar-meta { flex: 1; min-width: 0; }
+.avatar-meta b { display: block; font-size: 14px; }
+.avatar-meta span { font-size: 12.5px; color: var(--muted); }
+.avatar-actions { display: flex; gap: 8px; margin-top: 8px; }
+.mini-btn {
+  font-size: 12.5px; font-weight: 600;
+  padding: 7px 12px; border-radius: 9px;
+  border: 1px solid var(--border); background: #fff; color: var(--primary);
+  transition: background .15s ease, border-color .15s ease;
+}
+.mini-btn:hover { background: #eef2ff; border-color: #c7d2fe; }
+.mini-btn.ghost { color: var(--muted); }
+.mini-btn.ghost:hover { color: var(--danger); border-color: #fecaca; background: #fef2f2; }
+.hidden-input { display: none; }
+
+/* form grid */
+.setup-form { margin-top: 8px; }
+.form-grid { display: grid; grid-template-columns: 1fr; gap: 2px; }
+@media (min-width: 560px) {
+  .form-grid.two { grid-template-columns: 1fr 1fr; gap: 0 16px; }
+}
+
+.field label {
+  display: flex; align-items: center; gap: 6px;
+  font-weight: 600; margin: 14px 0 6px; font-size: 13.5px; color: #334155;
+}
+.field label .req { color: var(--danger); }
+.field .ctrl {
+  position: relative;
+}
+.field .ctrl .lead {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  font-size: 15px; color: var(--muted); pointer-events: none;
+}
+.field input,
+.field select {
+  width: 100%; padding: 12px 14px; font-size: 14px;
+  border: 1px solid var(--border); border-radius: 11px; background: #fff;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+.field input.with-lead { padding-left: 34px; }
+.field input:focus,
+.field select:focus {
+  outline: none; border-color: var(--primary);
+  box-shadow: 0 0 0 3px #4f46e522;
+}
+.field .err { color: var(--danger); font-size: 12px; margin-top: 5px; }
+
+/* seniority segmented control */
+.segmented {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;
+  background: #f1f5f9; padding: 5px; border-radius: 12px;
+}
+.segmented button {
+  border: none; background: transparent; color: var(--muted);
+  font-size: 12.5px; font-weight: 600; padding: 9px 4px; border-radius: 8px;
+  transition: all .15s ease;
+}
+.segmented button.active {
+  background: #fff; color: var(--primary);
+  box-shadow: 0 2px 8px rgba(30,27,75,.12);
+}
+
+/* progress + submit */
+.setup-progress {
+  height: 6px; border-radius: 999px; background: #eef2ff; overflow: hidden;
+  margin: 22px 0 6px;
+}
+.setup-progress > i {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, #7c6cff, #f59e0b);
+  transition: width .35s ease;
+}
+.setup-progress-label {
+  font-size: 12px; color: var(--muted); margin-bottom: 16px;
+}
+
+.btn-primary-lg {
+  width: 100%;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  padding: 14px 18px; border: none; border-radius: 13px;
+  background: linear-gradient(135deg, #4f46e5, #4338ca); color: #fff;
+  font-weight: 700; font-size: 15.5px;
+  transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease;
+}
+.btn-primary-lg:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px -10px rgba(79,70,229,.55);
+}
+.btn-primary-lg:disabled { opacity: .6; cursor: not-allowed; }
+
+.setup-hint {
+  margin-top: 14px; text-align: center;
+  font-size: 12.5px; color: var(--muted); line-height: 1.6;
+}
+
+/* left panel welcome steps */
+.welcome-steps { position: relative; z-index: 2; display: grid; gap: 12px; margin-top: 20px; }
+.welcome-step {
+  display: flex; gap: 14px; align-items: center;
+  padding: 13px 16px; border-radius: 14px;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.10);
+}
+.welcome-step .n {
+  flex: 0 0 auto; width: 30px; height: 30px; border-radius: 9px;
+  display: grid; place-items: center; font-weight: 800; font-size: 14px;
+  background: rgba(255,255,255,.12);
+}
+.welcome-step.done .n { background: linear-gradient(135deg,#22c55e,#16a34a); }
+.welcome-step b { font-size: 14.5px; display: block; }
+.welcome-step span { font-size: 12.5px; color: #b6c0e6; }

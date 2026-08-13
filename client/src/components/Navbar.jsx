@@ -1,9 +1,20 @@
+import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import '../pages/css/app.css';
+
+const LINKS = [
+  { to: '/browse', label: 'Browse' },
+  { to: '/create', label: 'Ask' },
+  { to: '/my-offers', label: 'My Offers' },
+  { to: '/premium', label: 'Premium' },
+];
 
 export default function Navbar() {
   const { session, profile, signOut } = useAuth();
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+
   if (!session) return null;
 
   const doSignOut = async () => {
@@ -11,18 +22,50 @@ export default function Navbar() {
     navigate('/login');
   };
 
+  const initials = (profile?.full_name || '?')
+    .split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+
   return (
-    <nav className="navbar">
-      <div className="navbar-inner">
-        <NavLink to="/" className="brand">Refer<span>Me!</span></NavLink>
+    <nav className="nav">
+      <div className="nav-inner">
+        <NavLink to="/" className="nav-brand" onClick={() => setOpen(false)}>
+          <span className="dot">🤝</span>
+          Refer<span>Me!</span>
+        </NavLink>
+
         <div className="nav-links">
-          <NavLink to="/browse">Browse</NavLink>
-          <NavLink to="/create">Ask</NavLink>
-          <NavLink to="/my-offers">My Offers</NavLink>
-          <NavLink to="/premium">Premium</NavLink>
-          {profile && <span className="rp-pill">⚡ {profile.rp_balance} RP</span>}
-          <button className="btn small secondary" onClick={doSignOut}>Sign out</button>
+          {LINKS.map((l) => (
+            <NavLink key={l.to} to={l.to} className={({ isActive }) => (isActive ? 'active' : '')}>
+              {l.label}
+            </NavLink>
+          ))}
         </div>
+
+        <div className="nav-right">
+          {profile && <span className="nav-rp">⚡ {profile.rp_balance} RP</span>}
+
+          {profile?.avatar_url
+            ? <img className="nav-avatar" src={profile.avatar_url} alt="me" onClick={() => navigate('/')} />
+            : <div className="nav-avatar" onClick={() => navigate('/')}>{initials}</div>}
+
+          <button className="nav-signout" onClick={doSignOut}>Sign out</button>
+
+          <button className="nav-burger" onClick={() => setOpen((o) => !o)} aria-label="Menu">
+            {open ? '✕' : '☰'}
+          </button>
+        </div>
+      </div>
+
+      <div className={`nav-mobile ${open ? 'open' : ''}`}>
+        {LINKS.map((l) => (
+          <NavLink
+            key={l.to} to={l.to}
+            className={({ isActive }) => (isActive ? 'active' : '')}
+            onClick={() => setOpen(false)}
+          >
+            {l.label}
+          </NavLink>
+        ))}
       </div>
     </nav>
   );
