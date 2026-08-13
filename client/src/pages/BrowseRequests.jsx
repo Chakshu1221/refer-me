@@ -147,7 +147,7 @@ export default function BrowseRequests() {
                       ? <img className="asker-av" src={asker.avatar_url} alt="" />
                       : <div className="asker-av">{initials}</div>}
                     <div className="asker-info">
-                      <b>{asker.full_name || 'Someone'}</b>
+                      <b>{asker.full_name || 'Someone'}{asker.is_premium && <span title="Premium member"> 💎</span>}</b>
                       <span>
                         <span className={`trust-dot ${trustLevel(asker.trust_score)}`} />
                         Trust {asker.trust_score ?? 100}

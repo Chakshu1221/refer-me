@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api, uploadToCloudinary } from '../lib/api.js';
@@ -27,6 +27,52 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
   const [error, setError] = useState('');
+
+  // ---- document vault ----
+  const docFileRef = useRef(null);
+  const [docs, setDocs] = useState([]);
+  const [docName, setDocName] = useState('');
+  const [docKind, setDocKind] = useState('resume');
+  const [docUrl, setDocUrl] = useState('');
+  const [docUploading, setDocUploading] = useState(false);
+  const [docSaving, setDocSaving] = useState(false);
+
+  useEffect(() => {
+    api.myDocuments().then((d) => setDocs(d || [])).catch(() => setDocs([]));
+  }, []);
+
+  const handleDocFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setDocUploading(true); setError('');
+    try {
+      const url = await uploadToCloudinary(file, docKind);
+      setDocUrl(url);
+      if (!docName.trim()) setDocName(file.name.replace(/\.[^.]+$/, ''));
+    } catch (err) { setError(`Upload failed: ${err.message}`); }
+    finally { setDocUploading(false); }
+  };
+
+  const saveDoc = async () => {
+    if (!docName.trim()) { setError('Give your document a name.'); return; }
+    if (!docUrl) { setError('Upload a file first.'); return; }
+    setDocSaving(true); setError('');
+    try {
+      const created = await api.addDocument({ name: docName.trim(), url: docUrl, kind: docKind });
+      setDocs([created, ...docs]);
+      setDocName(''); setDocUrl(''); setDocKind('resume');
+      setMsg('📁 Document saved to your vault.');
+    } catch (err) { setError(err.message); }
+    finally { setDocSaving(false); }
+  };
+
+  const deleteDoc = async (id) => {
+    if (!window.confirm('Delete this document from your vault?')) return;
+    try {
+      await api.deleteDocument(id);
+      setDocs(docs.filter((d) => d.id !== id));
+    } catch (err) { setError(err.message); }
+  };
 
   if (!profile) return <div className="page"><div className="skeleton" style={{ height: 300, borderRadius: 22 }} /></div>;
 
@@ -218,6 +264,64 @@ export default function Profile() {
           </div>
         </div>
       )}
+
+      {/* DOCUMENT VAULT */}
+      <div className="pf-section">
+        <div className="dv-head">
+          <h2>📁 Document vault</h2>
+          <span className="chip fulfilled">{docs.length} saved</span>
+        </div>
+        <p className="dv-sub">
+          Save your resumes &amp; docs once, then pick them when asking for a referral —
+          no re-uploading, and it saves storage.
+        </p>
+
+        <div className="dv-add">
+          <div className="dv-field">
+            <label>Document name</label>
+            <input value={docName} onChange={(e) => setDocName(e.target.value)} placeholder="e.g. Backend Resume 2026" />
+          </div>
+          <div className="dv-field">
+            <label>Type</label>
+            <select value={docKind} onChange={(e) => setDocKind(e.target.value)}>
+              <option value="resume">Resume</option>
+              <option value="jd">Job description</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div className="dv-field">
+            <label style={{ visibility: 'hidden' }}>File</label>
+            <button type="button" className={`dv-upload-btn ${docUrl ? 'picked' : ''}`} onClick={() => docFileRef.current?.click()}>
+              {docUploading ? 'Uploading…' : docUrl ? '✅ File ready' : '📎 Choose file'}
+            </button>
+            <input ref={docFileRef} className="hidden-input" type="file" accept=".pdf,.doc,.docx,image/*" onChange={handleDocFile} />
+          </div>
+          <button className="dv-save-btn" onClick={saveDoc} disabled={docSaving || docUploading || !docUrl || !docName.trim()}>
+            {docSaving ? 'Saving…' : 'Add'}
+          </button>
+        </div>
+
+        {docs.length === 0 ? (
+          <div className="dv-empty">No documents yet. Add your first resume above. 📄</div>
+        ) : (
+          <div className="dv-list">
+            {docs.map((d) => (
+              <div className="dv-item" key={d.id}>
+                <div className="dv-ic">{d.kind === 'jd' ? '📑' : d.kind === 'other' ? '📎' : '📄'}</div>
+                <div className="info">
+                  <b>{d.name}</b>
+                  <span>Added {new Date(d.created_at).toLocaleDateString()}</span>
+                </div>
+                <span className="dv-kind">{d.kind}</span>
+                <div className="dv-actions">
+                  <a className="dv-view" href={d.url} target="_blank" rel="noreferrer">View</a>
+                  <button className="dv-del" onClick={() => deleteDoc(d.id)}>Delete</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* ACCOUNT */}
       <div className="pf-section">

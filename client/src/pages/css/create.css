@@ -155,3 +155,26 @@ input[type=range].rp-range::-moz-range-thumb {
   margin-top: 14px; font-size: 12px; color: var(--muted); line-height: 1.5;
   background: #f8fafc; border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px;
 }
+
+/* ---------- wallet note + vault picker ---------- */
+.rp-wallet-note {
+  margin-top: 12px; font-size: 12.5px; color: #334155;
+  background: #fff; border: 1px solid #e0e7ff; border-radius: 10px; padding: 9px 12px;
+}
+.rp-wallet-note b { color: var(--primary); }
+
+.vault-picker { display: flex; gap: 8px; flex-wrap: wrap; }
+.vault-chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  border: 1px solid var(--border); background: #fff; color: var(--text);
+  padding: 9px 13px; border-radius: 11px; font-size: 13px; font-weight: 600;
+  max-width: 220px; transition: all .15s ease;
+}
+.vault-chip:hover { border-color: #c7d2fe; background: #f5f7ff; }
+.vault-chip.active { border-color: var(--primary); background: #eef2ff; color: var(--primary); }
+.vault-chip .vc-ic { flex: 0 0 auto; }
+.vault-chip .vc-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.vault-chip .vc-check {
+  flex: 0 0 auto; width: 18px; height: 18px; border-radius: 50%;
+  background: var(--primary); color: #fff; display: grid; place-items: center; font-size: 11px; font-weight: 800;
+}

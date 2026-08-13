@@ -9,6 +9,7 @@ import requestRoutes from './routes/requests.js';
 import offerRoutes from './routes/offers.js';
 import uploadRoutes from './routes/uploads.js';
 import subscriptionRoutes from './routes/subscriptions.js';
+import documentRoutes from './routes/documents.js';
 
 dotenv.config();
 
@@ -52,6 +53,7 @@ app.use('/api/requests', requestRoutes);
 app.use('/api/offers', offerRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/subscriptions', subscriptionRoutes);
+app.use('/api/documents', documentRoutes);
 
 // ---- 404 + error handlers ----
 app.use((_req, res) => res.status(404).json({ error: 'Not found' }));

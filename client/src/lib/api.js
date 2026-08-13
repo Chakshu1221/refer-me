@@ -44,6 +44,11 @@ export const api = {
   // uploads
   uploadSignature: (kind) => request('/api/uploads/signature', { method: 'POST', body: { kind } }),
 
+  // document vault
+  myDocuments: () => request('/api/documents'),
+  addDocument: (body) => request('/api/documents', { method: 'POST', body }),
+  deleteDocument: (id) => request(`/api/documents/${id}`, { method: 'DELETE' }),
+
   // subscriptions
   plans: () => request('/api/subscriptions/plans'),
   mySubscription: () => request('/api/subscriptions/me'),

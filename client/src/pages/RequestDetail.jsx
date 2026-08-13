@@ -92,7 +92,10 @@ export default function RequestDetail() {
                   ? <img className="av" src={request.requester.avatar_url} alt="" />
                   : <div className="av">{initialsOf(request.requester.full_name)}</div>}
                 <div>
-                  <b>{request.requester.full_name}</b>
+                  <b>
+                    {request.requester.full_name}
+                    {request.requester.is_premium && <span className="chip premium" style={{ marginLeft: 8 }}>💎 Premium</span>}
+                  </b>
                   <span>{request.requester.current_company} · Trust {request.requester.trust_score ?? 100}</span>
                 </div>
               </div>

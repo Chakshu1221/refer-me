@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
 import { api, uploadToCloudinary } from '../lib/api.js';
@@ -14,8 +14,13 @@ export default function CreateRequest() {
   const resumeRef = useRef(null);
   const jdRef = useRef(null);
 
+  // you can only promise RP you actually hold
+  const available = profile?.rp_balance ?? 0;
+  const maxReward = Math.max(10, Math.min(500, available));
+
   const [form, setForm] = useState({
-    company_name: '', role_title: '', job_link: '', notes: '', rp_cost: 50,
+    company_name: '', role_title: '', job_link: '', notes: '',
+    rp_cost: Math.min(50, maxReward),
   });
   const [resumeUrl, setResumeUrl] = useState('');
   const [jdUrl, setJdUrl] = useState('');
@@ -23,6 +28,20 @@ export default function CreateRequest() {
   const [error, setError] = useState('');
   const [touched, setTouched] = useState({});
   const [saving, setSaving] = useState(false);
+
+  // document vault
+  const [docs, setDocs] = useState([]);
+  const [pickedDocId, setPickedDocId] = useState(null);
+
+  useEffect(() => {
+    api.myDocuments().then((d) => setDocs(d || [])).catch(() => setDocs([]));
+  }, []);
+
+  // keep reward within wallet if balance changes
+  useEffect(() => {
+    if (Number(form.rp_cost) > maxReward) setForm((f) => ({ ...f, rp_cost: maxReward }));
+    // eslint-disable-next-line
+  }, [maxReward]);
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   const blur = (k) => () => setTouched({ ...touched, [k]: true });
@@ -32,10 +51,22 @@ export default function CreateRequest() {
     if (!form.company_name.trim()) e.company_name = 'Company is required';
     if (!form.role_title.trim()) e.role_title = 'Role is required';
     if (form.job_link && !/^https?:\/\/.+/i.test(form.job_link)) e.job_link = 'Must start with http(s)://';
+    if (Number(form.rp_cost) > available) e.rp_cost = `You only have ${available} RP`;
     return e;
-  }, [form]);
+  }, [form, available]);
 
   const canSubmit = Object.keys(errors).length === 0 && !saving && !uploading;
+
+  // pick a saved doc from the vault as the resume (no re-upload)
+  const pickDoc = (doc) => {
+    if (pickedDocId === doc.id) {
+      setPickedDocId(null);
+      setResumeUrl('');
+    } else {
+      setPickedDocId(doc.id);
+      setResumeUrl(doc.url);
+    }
+  };
 
   const handleFile = async (e, kind, setter) => {
     const file = e.target.files?.[0];
@@ -133,11 +164,11 @@ export default function CreateRequest() {
                   <span>Points paid to the referrer on approval</span>
                   <span className="rp-value">⚡ {form.rp_cost} RP</span>
                 </div>
-                <input type="range" className="rp-range" min="10" max="500" step="5"
+                <input type="range" className="rp-range" min="10" max={maxReward} step="5"
                   value={form.rp_cost} onChange={set('rp_cost')} />
-                <div className="rp-ticks"><span>10</span><span>250</span><span>500</span></div>
+                <div className="rp-ticks"><span>10</span><span>{Math.round(maxReward / 2)}</span><span>{maxReward}</span></div>
                 <div className="rp-presets">
-                  {PRESETS.map((p) => (
+                  {PRESETS.filter((p) => p <= maxReward).map((p) => (
                     <button type="button" key={p}
                       className={`rp-preset ${Number(form.rp_cost) === p ? 'active' : ''}`}
                       onClick={() => setForm({ ...form, rp_cost: p })}>
@@ -145,8 +176,33 @@ export default function CreateRequest() {
                     </button>
                   ))}
                 </div>
+                <div className="rp-wallet-note">
+                  💼 You have <b>⚡ {available} RP</b> — you can promise up to {maxReward} RP.
+                </div>
               </div>
+              {touched.rp_cost && errors.rp_cost && <div className="err" style={{ marginTop: 6 }}>{errors.rp_cost}</div>}
             </div>
+
+            {/* vault picker */}
+            {docs.length > 0 && (
+              <div className="field">
+                <label>Use a saved resume <span className="opt">(from your vault)</span></label>
+                <div className="vault-picker">
+                  {docs.map((d) => (
+                    <button type="button" key={d.id}
+                      className={`vault-chip ${pickedDocId === d.id ? 'active' : ''}`}
+                      onClick={() => pickDoc(d)}>
+                      <span className="vc-ic">{d.kind === 'jd' ? '📑' : d.kind === 'other' ? '📎' : '📄'}</span>
+                      <span className="vc-name">{d.name}</span>
+                      {pickedDocId === d.id && <span className="vc-check">✓</span>}
+                    </button>
+                  ))}
+                </div>
+                <p className="hint" style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6 }}>
+                  Picking a saved resume reuses it — no new upload, saving storage.
+                </p>
+              </div>
+            )}
 
             {/* uploads */}
             <div className="field">
@@ -154,11 +210,11 @@ export default function CreateRequest() {
               <div className="uploads-row">
                 <div className={`dropzone ${resumeUrl ? 'done' : ''}`} onClick={() => resumeRef.current?.click()}>
                   <div className="dz-ic">{resumeUrl ? '✅' : '📄'}</div>
-                  <b>{uploading === 'resume' ? 'Uploading…' : resumeUrl ? 'Resume added' : 'Upload resume'}</b>
+                  <b>{uploading === 'resume' ? 'Uploading…' : pickedDocId ? 'Resume from vault' : resumeUrl ? 'Resume added' : 'Upload resume'}</b>
                   <span>PDF or DOC</span>
-                  {resumeUrl && <span className="dz-remove" onClick={(e) => { e.stopPropagation(); setResumeUrl(''); }}>Remove</span>}
+                  {resumeUrl && <span className="dz-remove" onClick={(e) => { e.stopPropagation(); setResumeUrl(''); setPickedDocId(null); }}>Remove</span>}
                   <input ref={resumeRef} className="hidden-input" type="file" accept=".pdf,.doc,.docx"
-                    onChange={(e) => handleFile(e, 'resume', setResumeUrl)} />
+                    onChange={(e) => { setPickedDocId(null); handleFile(e, 'resume', setResumeUrl); }} />
                 </div>
 
                 <div className={`dropzone ${jdUrl ? 'done' : ''}`} onClick={() => jdRef.current?.click()}>
