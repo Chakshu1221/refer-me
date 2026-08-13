@@ -10,6 +10,7 @@ import BrowseRequests from './pages/BrowseRequests.jsx';
 import RequestDetail from './pages/RequestDetail.jsx';
 import MyOffers from './pages/MyOffers.jsx';
 import Premium from './pages/Premium.jsx';
+import Profile from './pages/Profile.jsx';
 
 export default function App() {
   return (
@@ -37,6 +38,9 @@ export default function App() {
         } />
         <Route path="/premium" element={
           <ProtectedRoute><Premium /></ProtectedRoute>
+        } />
+        <Route path="/profile" element={
+          <ProtectedRoute><Profile /></ProtectedRoute>
         } />
       </Routes>
     </>

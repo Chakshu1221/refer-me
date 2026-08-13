@@ -45,8 +45,8 @@ export default function Navbar() {
           {profile && <span className="nav-rp">⚡ {profile.rp_balance} RP</span>}
 
           {profile?.avatar_url
-            ? <img className="nav-avatar" src={profile.avatar_url} alt="me" onClick={() => navigate('/')} />
-            : <div className="nav-avatar" onClick={() => navigate('/')}>{initials}</div>}
+            ? <img className="nav-avatar" src={profile.avatar_url} alt="me" onClick={() => navigate('/profile')} title="Profile" />
+            : <div className="nav-avatar" onClick={() => navigate('/profile')} title="Profile">{initials}</div>}
 
           <button className="nav-signout" onClick={doSignOut}>Sign out</button>
 
