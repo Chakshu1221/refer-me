@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
-import './auth.css';
+import './css/auth.css';
 
 function GoogleIcon() {
   return (
