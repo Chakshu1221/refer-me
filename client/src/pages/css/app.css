@@ -2,6 +2,10 @@
    APP SHELL + DASHBOARD - shared design system for logged-in pages
    Reused by Dashboard, Browse, Create, Detail, MyOffers, Premium.
    Responsive: mobile / tablet / laptop.
+
+   IMPORTANT:
+   This file intentionally fixes the navbar responsiveness inside app.css only.
+   Do not import any separate responsive.css file.
    ============================================================ */
 
 /* ---------------- NAVBAR ---------------- */
@@ -9,6 +13,7 @@
   position: sticky;
   top: 0;
   z-index: 40;
+  width: 100%;
   background: rgba(255, 255, 255, 0.82);
   backdrop-filter: saturate(180%) blur(14px);
   border-bottom: 1px solid var(--border);
@@ -16,6 +21,7 @@
 
 .nav-inner {
   max-width: 1080px;
+  width: 100%;
   margin: 0 auto;
   display: flex;
   align-items: center;
@@ -40,6 +46,8 @@
 .nav-brand .dot {
   width: 32px;
   height: 32px;
+  min-width: 32px;
+  min-height: 32px;
   border-radius: 9px;
   display: grid;
   place-items: center;
@@ -142,7 +150,6 @@
   background: #fef2f2;
 }
 
-/* mobile menu button */
 .nav-burger {
   display: none;
   border: 1px solid var(--border);
@@ -155,51 +162,59 @@
   font-size: 18px;
   color: var(--text);
   flex: 0 0 auto;
+  padding: 0;
 }
 
 .nav-mobile {
   display: none;
 }
 
-/* Tablet/mobile navbar */
-@media (max-width: 900px) {
+/*
+  TABLET + PHONE NAVBAR FIX
+  Use 1024px, not 780px, because many tablets still cannot fit:
+  Brand + all nav links + RP + avatar + signout.
+
+  !important is used only here because your app has multiple CSS files and some
+  older nav rules may still be loaded after this block in the deployed bundle.
+*/
+@media (max-width: 1024px) {
   .nav-inner {
-    padding: 10px 14px;
-    gap: 8px;
+    padding: 10px 14px !important;
+    gap: 8px !important;
   }
 
   .nav-links {
-    display: none;
-  }
-
-  .nav-burger {
-    display: grid;
-    place-items: center;
+    display: none !important;
   }
 
   .nav-signout {
-    display: none;
+    display: none !important;
+  }
+
+  .nav-burger {
+    display: grid !important;
+    place-items: center !important;
   }
 
   .nav-right {
-    gap: 8px;
+    gap: 8px !important;
   }
 
   .nav-rp {
-    padding: 6px 10px;
-    font-size: 12px;
+    padding: 6px 10px !important;
+    font-size: 12px !important;
   }
 
   .nav-avatar {
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
-    min-height: 34px;
-    font-size: 13px;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    min-height: 34px !important;
+    font-size: 13px !important;
   }
 
   .nav-mobile.open {
-    display: flex;
+    display: flex !important;
     flex-direction: column;
     gap: 4px;
     padding: 8px 14px 14px;
@@ -208,6 +223,7 @@
   }
 
   .nav-mobile a {
+    display: block;
     padding: 11px 12px;
     border-radius: 10px;
     font-weight: 600;
@@ -232,39 +248,41 @@
 /* Extra small mobile */
 @media (max-width: 380px) {
   .nav-inner {
-    padding: 9px 10px;
-    gap: 6px;
+    padding: 9px 10px !important;
+    gap: 6px !important;
   }
 
   .nav-brand {
-    font-size: 17px;
-    gap: 7px;
+    font-size: 17px !important;
+    gap: 7px !important;
   }
 
   .nav-brand .dot {
-    width: 28px;
-    height: 28px;
-    font-size: 15px;
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    min-height: 28px !important;
+    font-size: 15px !important;
   }
 
   .nav-rp {
-    padding: 5px 8px;
-    font-size: 11px;
+    padding: 5px 8px !important;
+    font-size: 11px !important;
   }
 
   .nav-avatar {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    min-height: 32px;
-    font-size: 12px;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    font-size: 12px !important;
   }
 
   .nav-burger {
-    width: 36px;
-    height: 36px;
-    min-width: 36px;
-    min-height: 36px;
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
   }
 }
 
