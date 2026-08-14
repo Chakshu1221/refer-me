@@ -3,24 +3,16 @@
    Reuses app.css shell. Responsive: mobile / tablet / laptop.
    ============================================================ */
 
-/* ---------- banner ---------- */
-.pf-banner {
-  position: relative; border-radius: 22px 22px 0 0; height: 130px; overflow: hidden;
-  background:
-    radial-gradient(500px 300px at 90% -40%, #f59e0b55, transparent 60%),
-    linear-gradient(135deg,#4f46e5 0%, #6d5efc 55%, #4338ca 100%);
-}
-.pf-banner::after {
-  content: ''; position: absolute; right: -30px; bottom: -60px;
-  width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle,#ffffff22,transparent 70%);
-}
+/* ---------- cover banner REMOVED (no cover page) ---------- */
+.pf-banner { display: none; }
+
 .pf-card {
-  background: var(--surface); border: 1px solid var(--border); border-top: none;
-  border-radius: 0 0 22px 22px; padding: 0 26px 26px; margin-bottom: 22px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 22px; padding: 24px 26px; margin-bottom: 22px;
   box-shadow: 0 20px 44px -30px rgba(30,27,75,.3);
 }
 .pf-idrow {
-  display: flex; align-items: flex-end; gap: 18px; margin-top: -46px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 18px; margin-top: 0; flex-wrap: wrap;
 }
 .pf-avatar-wrap { position: relative; flex: 0 0 auto; }
 .pf-avatar {
@@ -73,8 +65,12 @@
 .pf-item { min-width: 0; }
 .pf-item .k { font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 4px; }
 .pf-item .v { font-size: 15px; color: var(--text); font-weight: 600; word-break: break-word; overflow-wrap: anywhere; }
-.pf-item .v.empty { color: #94a3b8; font-weight: 500; font-style: normal; font-size: 13px; }
 .pf-item .v a { color: var(--primary); }
+/* empty placeholder is a small, light, inline text (selector fixed: span.empty lives INSIDE .v) */
+.pf-item .empty {
+  display: inline; font-size: 13px; font-weight: 500; font-style: normal;
+  color: #94a3b8; background: none; border: none; padding: 0;
+}
 
 /* ---------- edit mode ---------- */
 .pf-field label { display: block; font-weight: 600; margin-bottom: 6px; font-size: 13px; color: #334155; }
