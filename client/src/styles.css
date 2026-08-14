@@ -1,4 +1,9 @@
 :root {
+  /* 🔑 THE FIX: opt out of browser/OS "Auto Dark Mode" inversion.
+     Without this, Chrome on a dark-mode OS darkens your white cards
+     while leaving dark text dark → text becomes invisible. */
+  color-scheme: light;
+
   --primary: #4f46e5;
   --primary-dark: #4338ca;
   --accent: #f59e0b;
@@ -13,6 +18,9 @@
 }
 
 * { box-sizing: border-box; }
+
+html { color-scheme: light; }        /* belt-and-braces for the same fix */
+
 body {
   margin: 0;
   font-family: 'Poppins', system-ui, -apple-system, sans-serif;
