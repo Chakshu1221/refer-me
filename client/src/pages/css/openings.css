@@ -1,112 +1,72 @@
 /* ============================================================
-   REFERRAL OPENINGS — browse / post / detail / mine
-   Reuses app.css shell. Responsive: mobile / tablet / laptop.
+   OPENINGS - referrer posts, seeker grabs.
+   Reuses app.css / browse.css / create.css / detail.css.
+   Only new bits live here.
    ============================================================ */
 
-/* segmented toggle used on the marketplace to switch Requests <-> Openings */
-.mkt-toggle {
-  display: inline-flex; gap: 6px; background: #f1f5f9; padding: 5px;
-  border-radius: 12px; margin-bottom: 18px;
+/* ---- marketplace toggle (Requests | Openings) ---- */
+.mk-toggle {
+  display: inline-flex; gap: 4px; background: #f1f5f9;
+  padding: 5px; border-radius: 12px; margin-bottom: 18px;
 }
-.mkt-toggle a {
-  padding: 9px 16px; border-radius: 9px; font-size: 13.5px; font-weight: 700;
-  color: var(--muted); text-decoration: none; display: inline-flex; align-items: center; gap: 7px;
+.mk-toggle a {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 16px; border-radius: 9px; font-size: 14px; font-weight: 700;
+  color: var(--muted); text-decoration: none; white-space: nowrap;
+  transition: all .15s ease;
 }
-.mkt-toggle a.active { background: #fff; color: var(--primary); box-shadow: 0 2px 8px rgba(30,27,75,.12); }
+.mk-toggle a:hover { color: var(--text); }
+.mk-toggle a.active { background: #fff; color: var(--primary); box-shadow: 0 2px 8px rgba(30,27,75,.12); }
 
-/* hero */
-.op-hero {
-  border-radius: 20px; padding: 26px; margin-bottom: 20px; color: #fff; position: relative; overflow: hidden;
-  background:
-    radial-gradient(500px 340px at 108% -30%, #22c55e55, transparent 60%),
-    linear-gradient(135deg, #059669 0%, #10b981 55%, #047857 100%);
-  box-shadow: 0 22px 46px -24px #05966988;
+/* ---- slots badge on opening cards ---- */
+.slots-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0;
+  padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 700;
 }
-.op-hero h1 { margin: 0 0 4px; font-size: clamp(21px,3vw,27px); font-weight: 800; letter-spacing: -.5px; }
-.op-hero p { margin: 0; color: #d1fae5; font-size: 14px; }
+.slots-badge.low { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
 
-/* grid + card */
-.op-grid { display: grid; gap: 16px; grid-template-columns: 1fr; }
-@media (min-width: 620px) { .op-grid { grid-template-columns: 1fr 1fr; } }
-@media (min-width: 980px) { .op-grid { grid-template-columns: 1fr 1fr 1fr; } }
-
-.op-card {
-  display: flex; flex-direction: column; color: inherit; text-decoration: none;
-  background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 18px;
-  transition: transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+/* ---- claim status timeline (seeker side) ---- */
+.claim-steps { display: grid; gap: 10px; margin: 4px 0 6px; }
+.claim-step {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 12px 14px; border-radius: 12px; border: 1px solid var(--border); background: #fff;
 }
-.op-card:hover { transform: translateY(-4px); border-color: #a7f3d0; box-shadow: 0 20px 40px -22px rgba(16,185,129,.5); }
-.op-head { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.op-logo {
-  width: 46px; height: 46px; border-radius: 12px; flex: 0 0 auto; display: grid; place-items: center;
-  font-size: 19px; font-weight: 800; color: #fff; background: linear-gradient(135deg,#10b981,#047857);
+.claim-step .n {
+  flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 12px; font-weight: 800;
+  background: #eef2ff; color: var(--primary);
 }
-.op-title { flex: 1; min-width: 0; }
-.op-title h3 { margin: 0; font-size: 16px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.op-title .co { font-size: 13px; color: var(--muted); }
-.op-notes { font-size: 13px; color: #475569; line-height: 1.5; margin: 0 0 12px;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.op-foot { margin-top: auto; display: flex; align-items: center; justify-content: space-between;
-  padding-top: 12px; border-top: 1px solid var(--border); }
-.op-slots { font-size: 12px; color: var(--muted); font-weight: 600; }
-.op-price {
-  display: inline-flex; align-items: center; gap: 5px; color: #fff; font-weight: 700; font-size: 13px;
-  background: linear-gradient(135deg,#059669,#047857); padding: 6px 12px; border-radius: 999px;
+.claim-step.done .n { background: linear-gradient(135deg,#16a34a,#15803d); color: #fff; }
+.claim-step.active .n { background: linear-gradient(135deg,#4f46e5,#4338ca); color: #fff; }
+.claim-step b { display: block; font-size: 13.5px; }
+.claim-step span { font-size: 12px; color: var(--muted); }
+
+/* ---- opening-specific reward pill (seeker pays) ---- */
+.pay-note {
+  display: flex; gap: 8px; align-items: flex-start;
+  font-size: 12px; color: #92400e; background: #fffbeb; border: 1px solid #fde68a;
+  padding: 10px 12px; border-radius: 11px; margin: 12px 0; line-height: 1.5;
 }
-.op-owner { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
-.op-owner .av { width: 26px; height: 26px; border-radius: 50%; background: #ecfdf5; color: #047857;
-  display: grid; place-items: center; font-size: 11px; font-weight: 800; }
-.op-owner b { font-size: 12.5px; }
 
-/* detail layout reuses detail.css classes where possible */
-.op-layout { display: grid; gap: 22px; grid-template-columns: 1fr; align-items: start; }
-@media (min-width: 920px) { .op-layout { grid-template-columns: 1.4fr 1fr; } }
-
-.op-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 22px; }
-.op-panel h3 { margin: 0 0 6px; font-size: 17px; font-weight: 800; }
-.op-panel .lead { margin: 0 0 16px; font-size: 13.5px; color: var(--muted); line-height: 1.5; }
-
-.op-btn {
-  width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 9px;
-  background: linear-gradient(135deg,#059669,#047857); color: #fff; border: none;
-  padding: 14px 18px; border-radius: 13px; font-weight: 700; font-size: 15px; cursor: pointer;
-  transition: transform .15s ease, box-shadow .2s ease, opacity .2s ease;
+/* ---- claim row (referrer viewing applicants) ---- */
+.claim-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 18px; margin-bottom: 14px;
 }
-.op-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 14px 30px -12px rgba(5,150,105,.6); }
-.op-btn:disabled { opacity: .55; cursor: not-allowed; }
-
-.op-vault { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px; }
-.op-vault-chip {
-  display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--border); background: #fff;
-  padding: 8px 12px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; max-width: 220px;
+.claim-top { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.claim-av {
+  width: 42px; height: 42px; min-width: 42px; border-radius: 50%; flex: 0 0 auto; object-fit: cover;
+  background: #eef2ff; color: var(--primary); display: grid; place-items: center; font-weight: 800; font-size: 15px;
 }
-.op-vault-chip.active { border-color: #10b981; background: #ecfdf5; color: #047857; }
-.op-vault-chip .n { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-/* claim rows on owner detail */
-.claim-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
-.claim-top { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-.claim-av { width: 40px; height: 40px; border-radius: 50%; flex: 0 0 auto; background: #ecfdf5; color: #047857;
-  display: grid; place-items: center; font-weight: 800; font-size: 15px; object-fit: cover; }
 .claim-who { flex: 1; min-width: 0; }
-.claim-who b { font-size: 14px; display: block; }
+.claim-who b { font-size: 14.5px; display: block; }
 .claim-who span { font-size: 12px; color: var(--muted); }
-.claim-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-
-/* proof zone */
-.op-proof {
-  border: 1.5px dashed var(--border); border-radius: 14px; padding: 22px 16px; text-align: center;
-  cursor: pointer; background: #fbfcff; transition: all .15s ease;
-}
-.op-proof:hover { border-color: #10b981; background: #f0fdf4; }
-.op-proof.done { border-style: solid; border-color: #86efac; background: #f0fdf4; }
-.op-proof .ic { font-size: 28px; margin-bottom: 6px; }
-.op-proof b { display: block; font-size: 14px; }
-.op-proof span { font-size: 12px; color: var(--muted); }
-
-.mkt-slots-note { font-size: 12px; color: var(--muted); margin-top: 8px; }
+.claim-msg { font-size: 13.5px; color: #475569; line-height: 1.5; margin: 0 0 12px; overflow-wrap: anywhere; }
+.claim-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+.claim-actions .btn-approve, .claim-actions .btn-reject { flex: 1 1 auto; }
 
 @media (max-width: 620px) {
-  .op-layout { grid-template-columns: 1fr; }
-  .claim-actions .op-btn { width: 100%; }
+  .mk-toggle { width: 100%; }
+  .mk-toggle a { flex: 1; justify-content: center; }
 }

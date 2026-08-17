@@ -11,6 +11,9 @@ import RequestDetail from './pages/RequestDetail.jsx';
 import MyOffers from './pages/MyOffers.jsx';
 import Premium from './pages/Premium.jsx';
 import Profile from './pages/Profile.jsx';
+import BrowseOpenings from './pages/BrowseOpenings.jsx';
+import OfferReferral from './pages/OfferReferral.jsx';
+import OpeningDetail from './pages/OpeningDetail.jsx';
 
 export default function App() {
   return (
@@ -24,6 +27,8 @@ export default function App() {
         <Route path="/" element={
           <ProtectedRoute><Dashboard /></ProtectedRoute>
         } />
+
+        {/* requests (seeker asks) */}
         <Route path="/browse" element={
           <ProtectedRoute><BrowseRequests /></ProtectedRoute>
         } />
@@ -33,6 +38,18 @@ export default function App() {
         <Route path="/request/:id" element={
           <ProtectedRoute><RequestDetail /></ProtectedRoute>
         } />
+
+        {/* openings (referrer posts) */}
+        <Route path="/openings" element={
+          <ProtectedRoute><BrowseOpenings /></ProtectedRoute>
+        } />
+        <Route path="/offer" element={
+          <ProtectedRoute><OfferReferral /></ProtectedRoute>
+        } />
+        <Route path="/opening/:id" element={
+          <ProtectedRoute><OpeningDetail /></ProtectedRoute>
+        } />
+
         <Route path="/my-offers" element={
           <ProtectedRoute><MyOffers /></ProtectedRoute>
         } />

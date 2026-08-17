@@ -4,8 +4,10 @@ import { useAuth } from '../context/AuthContext.jsx';
 import '../pages/css/app.css';
 
 const LINKS = [
-  { to: '/browse', label: 'Browse' },
+  { to: '/browse', label: 'Requests' },
+  { to: '/openings', label: 'Openings' },
   { to: '/create', label: 'Ask' },
+  { to: '/offer', label: 'Offer' },
   { to: '/my-offers', label: 'My Offers' },
   { to: '/premium', label: 'Premium' },
 ];
