@@ -8,7 +8,7 @@ const LINKS = [
   { to: '/browse', label: 'Browse' },
   { to: '/post', label: 'Post' },
   { to: '/my-offers', label: 'Activity' },
-  { to: '/premium', label: 'Premium' },
+  //{ to: '/premium', label: 'Premium' },
 ];
 
 export default function Navbar() {
