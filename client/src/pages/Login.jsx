@@ -14,35 +14,54 @@ function GoogleIcon() {
   );
 }
 
+const inputStyle = {
+  width: '100%', padding: '12px 14px', fontSize: 14,
+  border: '1px solid var(--border)', borderRadius: 12, background: '#fff',
+  fontFamily: 'inherit', marginBottom: 10,
+};
+
 export default function Login() {
-  const { session, signInWithGoogle, loading } = useAuth();
-  const [busy, setBusy] = useState(false);
+  const { session, signInWithGoogle, signInWithEmail, loading } = useAuth();
+  const [busyG, setBusyG] = useState(false);
+  const [busyE, setBusyE] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   if (loading) {
-    return (
-      <div className="auth-loading">
-        <div className="spinner" />
-      </div>
-    );
+    return <div className="auth-loading"><div className="spinner" /></div>;
   }
   if (session) return <Navigate to="/" replace />;
 
   const handleGoogle = async () => {
-    setBusy(true);
-    setError('');
+    setBusyG(true); setError('');
     try {
       const { error } = await signInWithGoogle();
       if (error) throw error;
     } catch (err) {
       setError(err.message || 'Sign-in failed. Please try again.');
-      setBusy(false);
+      setBusyG(false);
+    }
+  };
+
+  const handleEmail = async (e) => {
+    e.preventDefault();
+    setError('');
+    if (!email.trim() || !password) { setError('Enter your email and password.'); return; }
+    setBusyE(true);
+    try {
+      const { error } = await signInWithEmail(email.trim(), password);
+      if (error) throw error;
+      // success: AuthContext session listener redirects
+    } catch (err) {
+      setError(err.message || 'Login failed. Check your email/password.');
+      setBusyE(false);
     }
   };
 
   return (
     <div className="auth-wrap">
-      {/* -------- LEFT: brand story (laptop/tablet) -------- */}
+      {/* LEFT: brand story */}
       <aside className="auth-brand">
         <div className="auth-brand-top">
           <div className="auth-logo">
@@ -55,49 +74,36 @@ export default function Login() {
           <h1>Referrals that are <em>fair, mutual &amp; real.</em></h1>
           <p>
             A give-to-get network for working professionals. Help someone get
-            referred, and earn the right to be referred yourself — no favours
-            hoarded, no free-riding.
+            referred, and earn the right to be referred yourself.
           </p>
 
           <div className="auth-feats">
             <div className="auth-feat">
               <span className="ico">⚖️</span>
-              <div>
-                <h4>Everyone starts equal</h4>
-                <p>Fresh accounts begin with the same 100 Referral Points. No head starts, ever.</p>
-              </div>
+              <div><h4>Everyone starts equal</h4><p>Fresh accounts begin with the same 100 Referral Points.</p></div>
             </div>
             <div className="auth-feat">
               <span className="ico">🧾</span>
-              <div>
-                <h4>Proof-backed, no fakes</h4>
-                <p>Every referral needs uploaded proof before any points change hands.</p>
-              </div>
+              <div><h4>Proof-backed, no fakes</h4><p>Every referral needs uploaded proof before points move.</p></div>
             </div>
             <div className="auth-feat">
               <span className="ico">⚡</span>
-              <div>
-                <h4>Instant, transparent rewards</h4>
-                <p>Approve a referral and points move on the spot — deducted from you, credited to them.</p>
-              </div>
+              <div><h4>Instant, transparent rewards</h4><p>Approve a referral and points move on the spot.</p></div>
             </div>
           </div>
 
           <div className="auth-stat">
             <span className="rp">⚡</span>
-            <div>
-              <b>100 RP</b>
-              <span>welcome balance on sign-up</span>
-            </div>
+            <div><b>100 RP</b><span>welcome balance on sign-up</span></div>
           </div>
         </div>
 
         <div style={{ position: 'relative', zIndex: 2, fontSize: 13, color: '#9aa6d6' }}>
-          © {new Date().getFullYear()} Refer Me! · Built for professionals who help each other.
+          © {new Date().getFullYear()} Refer Me!
         </div>
       </aside>
 
-      {/* -------- RIGHT: sign-in -------- */}
+      {/* RIGHT: sign-in */}
       <main className="auth-panel">
         <div className="auth-card">
           <div className="auth-mini-brand">
@@ -110,33 +116,43 @@ export default function Login() {
 
           {error && <div className="alert error" style={{ marginBottom: 16 }}>{error}</div>}
 
-          <button className="g-btn" onClick={handleGoogle} disabled={busy}>
-            {busy ? (
-              <>
-                <span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} />
-                Connecting…
-              </>
+          <button className="g-btn" onClick={handleGoogle} disabled={busyG}>
+            {busyG ? (
+              <><span className="spinner" style={{ width: 18, height: 18, borderWidth: 2 }} /> Connecting…</>
             ) : (
-              <>
-                <GoogleIcon />
-                Continue with Google
-              </>
+              <><GoogleIcon /> Continue with Google</>
             )}
           </button>
 
-          <div className="auth-divider">SECURE SIGN-IN</div>
+          <div className="auth-divider">or sign in with email</div>
 
-          <div className="auth-chips">
-            <span className="auth-chip">🔒 Google-only login</span>
+          <form onSubmit={handleEmail}>
+            <input
+              type="email" style={inputStyle} placeholder="Email"
+              value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email"
+            />
+            <input
+              type="password" style={inputStyle} placeholder="Password"
+              value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password"
+            />
+            <button
+              type="submit" disabled={busyE}
+              className="g-btn"
+              style={{ background: 'linear-gradient(135deg,#4f46e5,#4338ca)', color: '#fff', border: 'none' }}
+            >
+              {busyE ? 'Signing in…' : 'Sign in'}
+            </button>
+          </form>
+
+          <p className="hint" style={{ marginTop: 12, textAlign: 'center', fontSize: 12.5 }}>
+            🔒 New here? Use <b>Continue with Google</b> first. You can set a password
+            later in your profile to enable email login.
+          </p>
+
+          <div className="auth-chips" style={{ marginTop: 18 }}>
             <span className="auth-chip">🧾 Proof required</span>
             <span className="auth-chip">⚖️ Fair by design</span>
           </div>
-
-          <p className="auth-foot">
-            By continuing you agree to our <a href="#">Terms</a> and{' '}
-            <a href="#">Privacy Policy</a>.<br />
-            New here? Your account is created automatically with 100 RP.
-          </p>
         </div>
       </main>
     </div>

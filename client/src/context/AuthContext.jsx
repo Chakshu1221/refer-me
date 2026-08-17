@@ -35,11 +35,22 @@ export function AuthProvider({ children }) {
     return () => sub.subscription.unsubscribe();
   }, []);
 
+  // --- Google OAuth ---
   const signInWithGoogle = () =>
     supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: window.location.origin },
     });
+
+  // --- Email + password sign-in (existing accounts only; no sign-up) ---
+  const signInWithEmail = (email, password) =>
+    supabase.auth.signInWithPassword({ email, password });
+
+  // --- Set / change password on the currently logged-in account ---
+  // After a Google login, this attaches a password to the SAME account,
+  // so next time the user can log in with their Google email + this password.
+  const setPassword = (password) =>
+    supabase.auth.updateUser({ password });
 
   const signOut = async () => {
     await supabase.auth.signOut();
@@ -48,7 +59,16 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider
-      value={{ session, profile, loading, signInWithGoogle, signOut, refreshProfile: loadProfile }}
+      value={{
+        session,
+        profile,
+        loading,
+        signInWithGoogle,
+        signInWithEmail,
+        setPassword,
+        signOut,
+        refreshProfile: loadProfile,
+      }}
     >
       {children}
     </AuthContext.Provider>
