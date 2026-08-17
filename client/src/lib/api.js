@@ -28,7 +28,7 @@ export const api = {
   updateMyProfile: (body) => request('/api/profile/me', { method: 'PUT', body }),
   getProfile: (id) => request(`/api/profile/${id}`),
 
-  // requests
+  // requests (seeker asks -> referrer offers)
   browseRequests: (params = '') => request(`/api/requests${params}`),
   myRequests: () => request('/api/requests/mine'),
   getRequest: (id) => request(`/api/requests/${id}`),
@@ -40,6 +40,23 @@ export const api = {
   myOffers: () => request('/api/offers/mine'),
   approveOffer: (id) => request(`/api/offers/${id}/approve`, { method: 'POST' }),
   rejectOffer: (id, reason) => request(`/api/offers/${id}/reject`, { method: 'POST', body: { reason } }),
+
+  // openings (referrer posts -> seeker grabs)
+  browseOpenings: (params = '') => request(`/api/openings${params}`),
+  myOpenings: () => request('/api/openings/mine'),
+  getOpening: (id) => request(`/api/openings/${id}`),
+  createOpening: (body) => request('/api/openings', { method: 'POST', body }),
+  closeOpening: (id) => request(`/api/openings/${id}/close`, { method: 'PATCH' }),
+
+  // claims (on openings)
+  claimOpening: (id, body) => request(`/api/openings/${id}/claim`, { method: 'POST', body }),
+  myClaims: () => request('/api/openings/claims/mine'),
+  submitClaimProof: (claimId, proof_url) =>
+    request(`/api/openings/claims/${claimId}/proof`, { method: 'POST', body: { proof_url } }),
+  approveClaim: (claimId) =>
+    request(`/api/openings/claims/${claimId}/approve`, { method: 'POST' }),
+  rejectClaim: (claimId, reason) =>
+    request(`/api/openings/claims/${claimId}/reject`, { method: 'POST', body: { reason } }),
 
   // uploads
   uploadSignature: (kind) => request('/api/uploads/signature', { method: 'POST', body: { kind } }),

@@ -1,0 +1,37 @@
+# .github/workflows/keep-alive.yml
+# Pings your Render API so the free instance does not sleep.
+# Put this file at: .github/workflows/keep-alive.yml  in your repo.
+#
+# 1) Edit PING_URL below to your real API URL, e.g.
+#      https://refer-me-api.onrender.com/ping
+#    (or add it as a repo secret named PING_URL and it will be used).
+# 2) Commit. GitHub runs it on the schedule automatically.
+#
+# NOTE: GitHub cron is best-effort; ~*/12 min is a good practical choice.
+
+name: keep-alive
+
+on:
+  schedule:
+    - cron: "*/12 * * * *"   # every 12 minutes
+  workflow_dispatch:          # lets you run it manually from the Actions tab
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the API
+        run: |
+          URL="${{ secrets.PING_URL }}"
+          if [ -z "$URL" ]; then
+            URL="https://YOUR-API.onrender.com/ping"
+          fi
+          echo "Pinging $URL"
+          code=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+          echo "HTTP $code"
+          # do not fail the job on a cold-start slow response
+          if [ "$code" = "000" ]; then
+            echo "No response (instance may be waking up) - retrying once..."
+            sleep 20
+            curl -s -o /dev/null -w "%{http_code}" "$URL" || true
+          fi
