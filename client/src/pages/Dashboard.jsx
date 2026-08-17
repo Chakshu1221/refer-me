@@ -57,43 +57,27 @@ export default function Dashboard() {
 
       {/* STATS */}
       <div className="stat-grid">
-        <div className="stat">
-          <div className="ic i1">📨</div>
-          <b>{loading ? '—' : stats.total}</b>
-          <span>Requests posted</span>
-        </div>
-        <div className="stat">
-          <div className="ic i2">🟢</div>
-          <b>{loading ? '—' : stats.open}</b>
-          <span>Currently open</span>
-        </div>
-        <div className="stat">
-          <div className="ic i3">🎯</div>
-          <b>{loading ? '—' : stats.fulfilled}</b>
-          <span>Fulfilled</span>
-        </div>
-        <div className="stat">
-          <div className="ic i4">🤝</div>
-          <b>{loading ? '—' : stats.approvedOffers}</b>
-          <span>Referrals given</span>
-        </div>
+        <div className="stat"><div className="ic i1">📨</div><b>{loading ? '—' : stats.total}</b><span>Requests posted</span></div>
+        <div className="stat"><div className="ic i2">🟢</div><b>{loading ? '—' : stats.open}</b><span>Currently open</span></div>
+        <div className="stat"><div className="ic i3">🎯</div><b>{loading ? '—' : stats.fulfilled}</b><span>Fulfilled</span></div>
+        <div className="stat"><div className="ic i4">🤝</div><b>{loading ? '—' : stats.approvedOffers}</b><span>Referrals given</span></div>
       </div>
 
-      {/* QUICK ACTIONS */}
+      {/* QUICK ACTIONS -> match new flow (Browse + Post) */}
       <div className="action-grid">
         <Link to="/browse" className="action-card a-give">
           <span className="big">🔎</span>
           <div>
-            <h3>Give a referral</h3>
-            <p>Browse open requests, refer someone at your company, upload proof and earn RP.</p>
+            <h3>Browse the board</h3>
+            <p>See who's seeking referrals and who's offering them. Help someone and earn RP, or grab an opening.</p>
           </div>
           <span className="arrow">→</span>
         </Link>
-        <Link to="/create" className="action-card a-ask">
-          <span className="big">🙋</span>
+        <Link to="/post" className="action-card a-ask">
+          <span className="big">📝</span>
           <div>
-            <h3>Ask for a referral</h3>
-            <p>Post a role you want. You only spend RP when you approve a valid referral.</p>
+            <h3>Post something</h3>
+            <p>Ask for a referral you want, or offer one you can give at your company.</p>
           </div>
           <span className="arrow">→</span>
         </Link>
@@ -102,7 +86,7 @@ export default function Dashboard() {
       {/* MY REQUESTS */}
       <div className="section-title">
         <h2>My requests</h2>
-        {mine.length > 0 && <Link to="/create">+ New request</Link>}
+        {mine.length > 0 && <Link to="/post">+ Post</Link>}
       </div>
 
       {loading ? (
@@ -114,8 +98,8 @@ export default function Dashboard() {
         <div className="empty">
           <div className="em">📭</div>
           <h3>No requests yet</h3>
-          <p>Post your first referral request and let the community help you.</p>
-          <Link to="/create" className="btn-cta">🙋 Ask for a referral</Link>
+          <p>Post your first request or offer and let the community help.</p>
+          <Link to="/post" className="btn-cta">📝 Post something</Link>
         </div>
       ) : (
         <div className="req-grid">
@@ -128,9 +112,7 @@ export default function Dashboard() {
               <p className="req-company">🏢 {r.company_name}</p>
               <div className="req-foot">
                 <span className="req-rp">⚡ {r.rp_cost} RP</span>
-                <span className="req-meta">
-                  {new Date(r.created_at).toLocaleDateString()}
-                </span>
+                <span className="req-meta">{new Date(r.created_at).toLocaleDateString()}</span>
               </div>
             </Link>
           ))}

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import './css/app.css';
@@ -30,56 +30,44 @@ export default function BrowseOpenings() {
       if (comp) parts.push(`company=${encodeURIComponent(comp)}`);
       const qs = parts.length ? `?${parts.join('&')}` : '';
       setItems(await api.browseOpenings(qs));
-    } catch {
-      setItems([]);
-    } finally {
-      setLoading(false);
-    }
+    } catch { setItems([]); } finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, []);
-
   const onSearch = () => load(q, company);
 
   return (
     <div className="page">
       <div className="browse-hero">
         <h1>Grab a referral 🎁</h1>
-        <p>Professionals are offering to refer people at their companies. Grab one with your resume.</p>
+        <p>People are offering to refer at their companies. Grab one with your resume.</p>
         <div className="search-bar">
-          <div className="search-field">
-            <span className="ic">💼</span>
-            <input placeholder="Role or keyword" value={q}
-              onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && onSearch()} />
+          <div className="search-field"><span className="ic">💼</span>
+            <input placeholder="Role or keyword" value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && onSearch()} />
           </div>
-          <div className="search-field">
-            <span className="ic">🏢</span>
-            <input placeholder="Company" value={company}
-              onChange={(e) => setCompany(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && onSearch()} />
+          <div className="search-field"><span className="ic">🏢</span>
+            <input placeholder="Company" value={company} onChange={(e) => setCompany(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && onSearch()} />
           </div>
           <button className="search-go" onClick={onSearch}>Search</button>
         </div>
       </div>
 
-      {/* marketplace toggle */}
+      {/* unified marketplace toggle */}
       <div className="mk-toggle">
-        <Link to="/browse">🙋 Requests</Link>
-        <Link to="/openings" className="active">🎁 Openings</Link>
+        <Link to="/browse">🙋 Seeking referrals</Link>
+        <Link to="/openings" className="active">🎁 Offering referrals</Link>
       </div>
 
       <div className="browse-toolbar">
-        <span className="browse-count"><b>{loading ? '…' : items.length}</b> open opening{items.length === 1 ? '' : 's'}</span>
+        <span className="browse-count"><b>{loading ? '…' : items.length}</b> offering</span>
         <Link to="/offer" className="btn-cta" style={{ marginLeft: 'auto' }}>➕ Offer a referral</Link>
       </div>
 
       {loading ? (
-        <div className="browse-grid">
-          {[0, 1, 2].map((i) => <div key={i} className="skeleton" style={{ height: 180, borderRadius: 18 }} />)}
-        </div>
+        <div className="browse-grid">{[0, 1, 2].map((i) => <div key={i} className="skeleton" style={{ height: 180, borderRadius: 18 }} />)}</div>
       ) : items.length === 0 ? (
         <div className="empty">
-          <div className="em">🎁</div>
-          <h3>No openings right now</h3>
+          <div className="em">🎁</div><h3>No openings right now</h3>
           <p>Be the first to offer a referral at your company.</p>
           <Link to="/offer" className="btn-cta">➕ Offer a referral</Link>
         </div>
@@ -88,27 +76,19 @@ export default function BrowseOpenings() {
           {items.map((o) => {
             const ref = o.referrer || {};
             const initials = (ref.full_name || '?').split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
-            const left = Math.max(0, (o.slots || 1) - (o.slots_filled || 0));
+            const leftN = Math.max(0, (o.slots || 1) - (o.slots_filled || 0));
             return (
               <Link to={`/opening/${o.id}`} key={o.id} className="job-card">
                 <div className="job-head">
-                  <div className="company-logo" style={{ background: pickColor(o.company_name) }}>
-                    {(o.company_name || '?')[0].toUpperCase()}
-                  </div>
-                  <div className="job-title">
-                    <h3>{o.role_title}</h3>
-                    <span className="co">🏢 {o.company_name}</span>
-                  </div>
+                  <div className="company-logo" style={{ background: pickColor(o.company_name) }}>{(o.company_name || '?')[0].toUpperCase()}</div>
+                  <div className="job-title"><h3>{o.role_title}</h3><span className="co">🏢 {o.company_name}</span></div>
                 </div>
-
                 {o.notes && <p className="job-notes">{o.notes}</p>}
-
                 <div className="job-docs">
-                  <span className={`slots-badge ${left <= 1 ? 'low' : ''}`}>🎟️ {left} slot{left === 1 ? '' : 's'} left</span>
+                  <span className={`slots-badge ${leftN <= 1 ? 'low' : ''}`}>🎟️ {leftN} slot{leftN === 1 ? '' : 's'} left</span>
                   {o.jd_doc_url && <span className="doc-tag">📑 JD</span>}
                   {o.job_link && <span className="doc-tag">🔗 Link</span>}
                 </div>
-
                 <div className="job-foot">
                   <div className="asker">
                     {ref.avatar_url ? <img className="asker-av" src={ref.avatar_url} alt="" /> : <div className="asker-av">{initials}</div>}

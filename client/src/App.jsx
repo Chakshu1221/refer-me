@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute.jsx';
 import Login from './pages/Login.jsx';
 import ProfileSetup from './pages/ProfileSetup.jsx';
 import Dashboard from './pages/Dashboard.jsx';
+import Post from './pages/Post.jsx';
 import CreateRequest from './pages/CreateRequest.jsx';
 import BrowseRequests from './pages/BrowseRequests.jsx';
 import RequestDetail from './pages/RequestDetail.jsx';
@@ -28,23 +29,28 @@ export default function App() {
           <ProtectedRoute><Dashboard /></ProtectedRoute>
         } />
 
-        {/* requests (seeker asks) */}
+        {/* Browse (unified marketplace) */}
         <Route path="/browse" element={
           <ProtectedRoute><BrowseRequests /></ProtectedRoute>
+        } />
+        <Route path="/openings" element={
+          <ProtectedRoute><BrowseOpenings /></ProtectedRoute>
+        } />
+
+        {/* Post (single hub -> branches) */}
+        <Route path="/post" element={
+          <ProtectedRoute><Post /></ProtectedRoute>
         } />
         <Route path="/create" element={
           <ProtectedRoute><CreateRequest /></ProtectedRoute>
         } />
-        <Route path="/request/:id" element={
-          <ProtectedRoute><RequestDetail /></ProtectedRoute>
-        } />
-
-        {/* openings (referrer posts) */}
-        <Route path="/openings" element={
-          <ProtectedRoute><BrowseOpenings /></ProtectedRoute>
-        } />
         <Route path="/offer" element={
           <ProtectedRoute><OfferReferral /></ProtectedRoute>
+        } />
+
+        {/* details */}
+        <Route path="/request/:id" element={
+          <ProtectedRoute><RequestDetail /></ProtectedRoute>
         } />
         <Route path="/opening/:id" element={
           <ProtectedRoute><OpeningDetail /></ProtectedRoute>
