@@ -2,7 +2,6 @@ import { supabase } from './supabase.js';
 
 const BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8080';
 
-/** Attach the current Supabase JWT and call the backend. */
 async function request(path, { method = 'GET', body } = {}) {
   const { data: { session } } = await supabase.auth.getSession();
   const token = session?.access_token;
@@ -28,7 +27,7 @@ export const api = {
   updateMyProfile: (body) => request('/api/profile/me', { method: 'PUT', body }),
   getProfile: (id) => request(`/api/profile/${id}`),
 
-  // requests (seeker asks -> referrer offers)
+  // requests
   browseRequests: (params = '') => request(`/api/requests${params}`),
   myRequests: () => request('/api/requests/mine'),
   getRequest: (id) => request(`/api/requests/${id}`),
@@ -41,20 +40,19 @@ export const api = {
   approveOffer: (id) => request(`/api/offers/${id}/approve`, { method: 'POST' }),
   rejectOffer: (id, reason) => request(`/api/offers/${id}/reject`, { method: 'POST', body: { reason } }),
 
-  // openings (referrer posts -> seeker grabs)
+  // openings
   browseOpenings: (params = '') => request(`/api/openings${params}`),
   myOpenings: () => request('/api/openings/mine'),
   getOpening: (id) => request(`/api/openings/${id}`),
   createOpening: (body) => request('/api/openings', { method: 'POST', body }),
   closeOpening: (id) => request(`/api/openings/${id}/close`, { method: 'PATCH' }),
 
-  // claims (on openings)
+  // claims
   claimOpening: (id, body) => request(`/api/openings/${id}/claim`, { method: 'POST', body }),
   myClaims: () => request('/api/openings/claims/mine'),
   submitClaimProof: (claimId, proof_url) =>
     request(`/api/openings/claims/${claimId}/proof`, { method: 'POST', body: { proof_url } }),
-  approveClaim: (claimId) =>
-    request(`/api/openings/claims/${claimId}/approve`, { method: 'POST' }),
+  approveClaim: (claimId) => request(`/api/openings/claims/${claimId}/approve`, { method: 'POST' }),
   rejectClaim: (claimId, reason) =>
     request(`/api/openings/claims/${claimId}/reject`, { method: 'POST', body: { reason } }),
 
@@ -66,16 +64,18 @@ export const api = {
   addDocument: (body) => request('/api/documents', { method: 'POST', body }),
   deleteDocument: (id) => request(`/api/documents/${id}`, { method: 'DELETE' }),
 
+  // notifications
+  notifications: () => request('/api/notifications'),
+  unreadCount: () => request('/api/notifications/unread-count'),
+  markNotifRead: (id) => request(`/api/notifications/${id}/read`, { method: 'POST' }),
+  markAllNotifRead: () => request('/api/notifications/read-all', { method: 'POST' }),
+
   // subscriptions
   plans: () => request('/api/subscriptions/plans'),
   mySubscription: () => request('/api/subscriptions/me'),
   activatePlan: (plan) => request('/api/subscriptions/activate', { method: 'POST', body: { plan } }),
 };
 
-/**
- * Upload a file straight to Cloudinary using a signed payload from our backend.
- * Returns the secure_url to store in Postgres.
- */
 export async function uploadToCloudinary(file, kind) {
   const sig = await api.uploadSignature(kind);
   const form = new FormData();

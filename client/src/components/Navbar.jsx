@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext.jsx';
+import NotificationBell from './NotificationBell.jsx';
 import '../pages/css/app.css';
 
 const LINKS = [
@@ -53,6 +54,8 @@ export default function Navbar() {
 
         <div className="nav-right">
           {profile && <span className="nav-rp">⚡ {profile.rp_balance} RP</span>}
+
+          <NotificationBell />
 
           {profile?.avatar_url ? (
             <img className="nav-avatar" src={profile.avatar_url} alt="Profile" title="Profile" onClick={goProfile} />
