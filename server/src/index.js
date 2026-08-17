@@ -22,7 +22,7 @@ const START_TS = Date.now();
 app.use(express.json({ limit: '1mb' }));
 app.use(morgan('tiny'));
 
-const allowedOrigins = (process.env.CLIENT_ORIGIN || 'http://localhost:5173')
+const allowedOrigins = (process.env.CLIENT_ORIGIN || 'https://referme-vdmn.onrender.com/')
   .split(',')
   .map((s) => s.trim());
 
