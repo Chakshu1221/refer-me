@@ -1,318 +1,327 @@
-# Refer Me! 🤝 — Full Setup & Render Deployment Guide
+<div align="center">
 
-A fair, **give-to-get referral network**. Ask for referrals, give referrals, and a
-simple **Referral Points (RP)** economy keeps everyone equal.
+# 🤝 Refer Me!
 
-**Model:** plain — **no escrow, no ledger.** On approval, RP is **deducted from the
-requester and credited to the referrer** in one atomic step. **Proof of referral is
-mandatory** on every offer.
+### The fair referral marketplace where professionals help each other get hired.
 
-> ⚠️ **This guide assumes you are NOT running anything on your laptop.**
-> Everything is set up in the browser and deployed **directly on Render**.
-> You will only ever click around in dashboards — no terminal needed.
+*Give a referral, earn the right to get one. No favours hoarded. No free-riding.*
 
----
+`give-to-get` · `proof-backed` · `everyone-starts-equal`
 
-## 🗺️ The big picture — what you're about to create
-
-You will create **6 things**, in this order. Each one gives you some secret
-values (keys/IDs). Keep them in a notepad as you go — you'll paste them into
-Render at the end.
-
-| # | Where | What you get from it |
-|---|-------|----------------------|
-| 1 | **Supabase** | `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` |
-| 2 | **Google Cloud** | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` (for Google sign-in) |
-| 3 | **Cloudinary** | `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` |
-| 4 | **GitHub** | your code repo (Render deploys from here) |
-| 5 | **Render — Web Service** | your backend API, gives you an API URL |
-| 6 | **Render — Static Site** | your frontend, gives you the public app URL |
-
-📝 **Open a blank notepad now** and paste this template — you'll fill it in as you go:
-
-```
-SUPABASE_URL =
-SUPABASE_ANON_KEY =
-SUPABASE_SERVICE_ROLE_KEY =
-GOOGLE_CLIENT_ID =
-GOOGLE_CLIENT_SECRET =
-CLOUDINARY_CLOUD_NAME =
-CLOUDINARY_API_KEY =
-CLOUDINARY_API_SECRET =
-BACKEND_URL (from Render, step 5) =
-FRONTEND_URL (from Render, step 6) =
-```
+</div>
 
 ---
 
-## 1️⃣ Supabase — database, auth & keys
+## 📌 Table of contents
 
-### 1.1 Create the project
-1. Go to **https://supabase.com** → **Start your project** → sign in with GitHub.
-2. Click **New project**.
-3. Fill in:
-   - **Name:** `refer-me`
-   - **Database Password:** click **Generate a password**, then **copy it and save it** in your notepad (you may need it later; keep it safe).
-   - **Region:** pick the one closest to you (e.g. **Mumbai / South Asia**).
-4. Click **Create new project** and wait ~2 minutes for it to finish setting up.
-
-### 1.2 Get your URL and keys
-1. In the left sidebar click the **gear icon (Project Settings)** → **API**.
-2. You'll see three values. Copy each into your notepad:
-   - **Project URL** → this is your `SUPABASE_URL`
-     (looks like `https://abcdefgh.supabase.co`)
-   - **Project API keys → `anon` `public`** → this is your `SUPABASE_ANON_KEY`
-   - **Project API keys → `service_role` `secret`** → this is your
-     `SUPABASE_SERVICE_ROLE_KEY`
-     ⚠️ **Never share the service_role key or put it in the frontend.** Backend only.
-
-### 1.3 Create the database tables
-1. In the left sidebar click **SQL Editor** → **+ New query**.
-2. Open the file **`supabase/schema.sql`** from this project, copy **all** of it.
-3. Paste it into the SQL editor and click **Run** (bottom right).
-4. You should see **"Success. No rows returned."** ✅
-   This created all tables, security rules, and the approve/reject logic.
+1. [The problem](#-the-problem)
+2. [The idea](#-the-idea-in-one-line)
+3. [Why Refer Me! is different](#-why-refer-me-is-different)
+4. [How it works](#-how-it-works)
+5. [The Referral Points (RP) economy](#-the-referral-points-rp-economy)
+6. [Feature list](#-feature-list)
+7. [Who it's for](#-who-its-for-personas)
+8. [Real user journeys](#-real-user-journeys)
+9. [Trust & safety](#-trust--safety)
+10. [Premium](#-premium)
+11. [Tech overview](#-tech-overview)
+12. [Setup & deployment](#-setup--deployment)
+13. [Roadmap](#-roadmap)
+14. [FAQ](#-faq)
 
 ---
 
-## 2️⃣ Google Cloud — the Google sign-in credentials
+## 🎯 The problem
 
-This is what lets users click **"Continue with Google"**.
+Getting a job today is less about applications and more about **referrals**. A referred
+candidate is many times more likely to get an interview. But referrals are broken:
 
-### 2.1 Create a project
-1. Go to **https://console.cloud.google.com**.
-2. At the very top, click the **project dropdown** → **New Project**.
-3. Name it `refer-me` → **Create**. Wait a few seconds, then make sure this new
-   project is **selected** in the top dropdown.
+- 🙇 **Asking is awkward.** You cold-message strangers on LinkedIn and get ignored.
+- 🎭 **It's one-sided.** Some people only ever *take* referrals and never give back.
+- 🤥 **Fake promises.** "Sure, I referred you!" — but did they really?
+- 🕸️ **No structure.** No way to find who at a company is actually willing to refer.
 
-### 2.2 Configure the consent screen (what users see)
-1. Left menu → **APIs & Services** → **OAuth consent screen**.
-2. Choose **External** → **Create**.
-3. Fill in the required fields:
-   - **App name:** `Refer Me!`
-   - **User support email:** your email
-   - **Developer contact email:** your email
-4. Click **Save and Continue** through the next screens (Scopes, Test users) —
-   you can leave them default. On the last screen click **Back to Dashboard**.
-5. On the OAuth consent screen, under **Publishing status**, click
-   **Publish App** → **Confirm** (so anyone can sign in, not just test users).
-
-### 2.3 Create the OAuth Client ID
-1. Left menu → **APIs & Services** → **Credentials**.
-2. Click **+ Create Credentials** → **OAuth client ID**.
-3. **Application type:** **Web application**.
-4. **Name:** `refer-me-web`.
-5. Under **Authorized redirect URIs**, click **+ Add URI** and paste this — but
-   swap in **your** Supabase project URL from step 1.2:
-   ```
-   https://YOUR-PROJECT.supabase.co/auth/v1/callback
-   ```
-   (Example: `https://abcdefgh.supabase.co/auth/v1/callback`)
-6. Click **Create**.
-7. A popup shows **Your Client ID** and **Your Client Secret**. Copy both into
-   your notepad as `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`.
-
-### 2.4 Plug Google into Supabase
-1. Back in **Supabase** → left sidebar **Authentication** → **Sign In / Providers**
-   (older UI: **Providers**).
-2. Find **Google** in the list → toggle it **ON**.
-3. Paste your **`GOOGLE_CLIENT_ID`** into **Client ID** and
-   **`GOOGLE_CLIENT_SECRET`** into **Client Secret**.
-4. Click **Save**.
-
-> ✅ Google sign-in is now connected. We'll set the redirect back to your app in
-> **Step 7**, once we have the Render frontend URL.
+There's no fair, trustworthy place where **giving** and **getting** referrals is balanced.
 
 ---
 
-## 3️⃣ Cloudinary — file storage (resume, JD, proof images)
+## 💡 The idea in one line
 
-1. Go to **https://cloudinary.com** → **Sign up for free** (Google sign-up is fine).
-2. After signup you land on the **Dashboard / Programmable Media** page.
-3. In the **Product Environment Credentials** box (top of the dashboard) you'll see:
-   - **Cloud name** → your `CLOUDINARY_CLOUD_NAME`
-   - **API Key** → your `CLOUDINARY_API_KEY`
-   - **API Secret** → click the **eye / "reveal"** icon → your `CLOUDINARY_API_SECRET`
-4. Copy all three into your notepad.
+> **Refer Me!** is a two-sided referral marketplace where a simple points economy makes
+> helping each other the *only* way to get ahead — and every referral must be **proven**.
 
-> That's it — no bucket or folder to create. The backend makes folders automatically.
+If you want referrals, you have to give referrals. Simple, fair, self-sustaining.
 
 ---
 
-## 4️⃣ GitHub — put the code online (Render deploys from GitHub)
+## 🌟 Why Refer Me! is different
 
-Render builds your app from a GitHub repository, so the code needs to live there.
+| Ordinary networking | **Refer Me!** |
+|---------------------|---------------|
+| Beg strangers for favours | A **marketplace** of people ready to help |
+| Takers exploit the system | **Give-to-get economy** — takers run out of points |
+| "I'll refer you" (maybe) | **Proof mandatory** before anything counts |
+| Head starts for the popular | **Everyone starts equal** (100 points) |
+| Pay to win | Points earned **only** by genuinely helping |
+| No accountability | **Trust score** + reasons on every rejection |
 
-### Easiest way (all in the browser, no git commands):
-1. Go to **https://github.com** → sign in → click **+ (top right)** → **New repository**.
-2. **Repository name:** `refer-me` → keep it **Private** → **Create repository**.
-3. On the new empty repo page, click **uploading an existing file** (the link in
-   "Get started by …").
-4. **Unzip** the `refer-me.zip` on your computer, then **drag the whole contents**
-   of the `refer-me` folder into the browser upload box (drag the `server`,
-   `client`, `supabase` folders and `README.md` together).
-5. Wait for the files to finish uploading, then click **Commit changes**.
-
-> 📌 Your repo now contains `/server`, `/client`, and `/supabase`. Render will use
-> `/server` for the API and `/client` for the website.
+The magic isn't "connecting people" — LinkedIn does that. The magic is making referrals
+**fair, mutual, and real.**
 
 ---
 
-## 5️⃣ Render — deploy the BACKEND (Node.js API)
+## 🔁 How it works
 
-1. Go to **https://render.com** → **Get Started** → sign in **with GitHub**
-   (this lets Render see your repo).
-2. Click **New +** (top right) → **Web Service**.
-3. **Connect** your `refer-me` GitHub repo (authorize Render if it asks).
-4. Fill in the settings:
-   - **Name:** `refer-me-api`
-   - **Region:** closest to you (e.g. **Singapore**)
-   - **Branch:** `main`
-   - **Root Directory:** `server`  ← **important**
-   - **Runtime:** `Node`
-   - **Build Command:** `npm install`
-   - **Start Command:** `npm start`
-   - **Instance Type:** **Free**
-5. Scroll down to **Environment Variables** → click **Add Environment Variable**
-   and add each of these (name on the left, your saved value on the right):
+Refer Me! works in **two directions** — you can pull help toward you, or push help out.
 
-   | Key | Value |
-   |-----|-------|
-   | `SUPABASE_URL` | *(from notepad)* |
-   | `SUPABASE_ANON_KEY` | *(from notepad)* |
-   | `SUPABASE_SERVICE_ROLE_KEY` | *(from notepad)* |
-   | `CLOUDINARY_CLOUD_NAME` | *(from notepad)* |
-   | `CLOUDINARY_API_KEY` | *(from notepad)* |
-   | `CLOUDINARY_API_SECRET` | *(from notepad)* |
-   | `CLOUDINARY_UPLOAD_FOLDER` | `refer-me` |
-   | `STARTER_RP` | `100` |
-   | `MAX_OPEN_REQUESTS` | `5` |
-   | `CLIENT_ORIGIN` | *(leave blank for now — you'll add it in Step 7)* |
+### 🙋 Direction 1 — Requests (you ask)
+> *"Please refer me at Google for an SDET role."*
 
-6. Click **Create Web Service**. Render will build and start it (takes 1–3 min).
-7. When it's live (green **"Live"** badge), copy the URL at the top — it looks like
-   `https://refer-me-api.onrender.com`. Save it as **`BACKEND_URL`** in your notepad.
-8. Test it: open `https://refer-me-api.onrender.com/health` in a browser — you
-   should see `{"status":"healthy",...}` ✅
+1. You post a **request** and set a points reward.
+2. Someone who works there refers you and **uploads proof**.
+3. You review the proof and **approve** — points transfer to them. 🎉
+
+### 🎁 Direction 2 — Openings (you offer)
+> *"I can refer 2 people at Google for SDET."*
+
+1. You post an **opening** with a few slots.
+2. Job seekers **grab a slot** and attach their resume.
+3. You refer them, **upload proof**, they **approve** — you earn points.
+
+Either way, the rule is the same:
+**the person receiving the referral pays points, the person giving it earns them — and proof is always required.**
 
 ---
 
-## 6️⃣ Render — deploy the FRONTEND (the website)
+## ⚡ The Referral Points (RP) economy
 
-1. In Render click **New +** → **Static Site**.
-2. Select the **same** `refer-me` repo.
-3. Fill in:
-   - **Name:** `refer-me-app`
-   - **Branch:** `main`
-   - **Root Directory:** `client`  ← **important**
-   - **Build Command:** `npm install && npm run build`
-   - **Publish Directory:** `dist`
-4. Scroll to **Environment Variables** → add these three:
+RP is the heartbeat of fairness. It's not money and it can't be bought outright.
 
-   | Key | Value |
-   |-----|-------|
-   | `VITE_SUPABASE_URL` | *(your `SUPABASE_URL`)* |
-   | `VITE_SUPABASE_ANON_KEY` | *(your `SUPABASE_ANON_KEY`)* |
-   | `VITE_API_BASE` | *(your `BACKEND_URL` from step 5, e.g. `https://refer-me-api.onrender.com`)* |
+| Action | RP effect | Why |
+|--------|-----------|-----|
+| 🆕 Sign up | **+100 RP** | Everyone starts identical — no head starts |
+| 🙏 Get referred (request or opening) | **− reward** | You can't just keep taking |
+| 🤝 Give a referral (proven + approved) | **+ reward** | Helping is the *only* way to keep going |
+| 🛡️ Successful, verified help | **Trust ↑** | Good actors rise |
+| 🚩 False rejection / abuse | **Trust ↓** | Bad actors throttle themselves out |
 
-5. Click **Create Static Site**. Wait for the build to finish.
-6. Copy the site URL (e.g. `https://refer-me-app.onrender.com`). Save it as
-   **`FRONTEND_URL`** in your notepad.
+**Design choices that keep it clean:**
+- 💸 **No escrow, no ledger complexity** — on approval, points are simply deducted from
+  one person and credited to the other, atomically.
+- 🔒 **You can never promise more RP than you hold** — enforced on both the slider and the server.
+- 🧾 **Points move only after proof is approved** — silence or fake claims can't cheat anyone.
 
-### 6.1 Make browser refresh work (SPA rewrite)
-Because this is a single-page React app, add a redirect so deep links don't 404:
-1. Open your `refer-me-app` static site in Render → **Redirects/Rewrites** tab.
-2. Click **Add Rule**:
-   - **Source:** `/*`
-   - **Destination:** `/index.html`
-   - **Action:** **Rewrite**
-3. **Save**.
+The result: a take-only account naturally **runs out of points** and must start helping.
+The community polices itself.
 
 ---
 
-## 7️⃣ Connect the two URLs (final wiring) 🔗
+## 🧩 Feature list
 
-Now that you have both URLs, link everything together:
+### 👤 Identity & profile
+- 🔐 **Google sign-in** (one-tap, no passwords)
+- 📝 Mandatory profile setup (company, role, seniority)
+- 🖼️ Avatar upload
+- 🛡️ **Trust score** + 💎 Premium badge shown across the app
+- 📊 Personal stats: RP balance, trust, plan
 
-### 7.1 Tell the backend to trust the frontend
-1. Render → **refer-me-api** (the Web Service) → **Environment** tab.
-2. Edit **`CLIENT_ORIGIN`** and set it to your **`FRONTEND_URL`**
-   (e.g. `https://refer-me-app.onrender.com`) → **Save Changes**.
-3. Render redeploys the API automatically.
+### 📁 Document vault *(storage-saving power feature)*
+- Save multiple **named resumes / JDs once** (e.g. "Backend Resume 2026")
+- **Reuse them** when asking for or grabbing referrals — no re-uploading
+- Saves Cloudinary storage and your time
+- View / delete anytime
 
-### 7.2 Tell Supabase where to send users after Google login
-1. Supabase → **Authentication** → **URL Configuration**.
-2. **Site URL:** set to your **`FRONTEND_URL`**.
-3. Under **Redirect URLs**, click **Add URL** and add your `FRONTEND_URL`
-   (and `FRONTEND_URL/*` to be safe).
-4. **Save**.
+### 🙋 Requests marketplace
+- Post a referral request with role, company, JD, resume, notes
+- **Points-reward slider** capped to your wallet
+- Rich, searchable/filterable job-board style browse
+- Offer to refer with **mandatory proof upload**
+- Approve / reject (reason required) with a **proof lightbox**
 
----
+### 🎁 Openings marketplace *(new)*
+- Post *"I can refer X people"* with **multiple slots** and a price
+- Seekers **grab a slot** using a saved resume
+- Referrer refers → **uploads proof** → seeker **approves** → points move
+- Slots auto-decrement; opening auto-fills when full
+- "My Openings" with **Posted** vs **Grabbed** tabs
 
-## ✅ 8️⃣ Test the whole thing
+### 🏠 Dashboard
+- Personalized greeting + live RP counter
+- Stat cards (posted / open / fulfilled / referrals given)
+- Quick actions and recent activity
 
-1. Open your **`FRONTEND_URL`** in a browser.
-2. Click **Continue with Google** → sign in.
-3. Fill in your profile (company, role) → **Save**.
-4. You should land on the dashboard showing **⚡ 100 RP**.
-5. Click **Ask** → post a referral request.
-6. Open the app in a **different Google account** (or ask a friend), find your
-   request under **Browse**, upload a **proof** image, and submit an offer.
-7. Back in your first account, open the request → **Approve** → watch **RP move**
-   from the requester to the referrer. 🎉
+### 💎 Premium
+- Monthly / yearly plans with a live **savings** calculation
+- Higher limits, priority placement, advanced filters, larger vault, Verified Pro badge
+- **Never grants free RP** — fairness stays sacred
 
-> 💤 **Note on Render Free tier:** the backend "sleeps" after ~15 min of no use, so
-> the **first** request after idle can take ~30–50 seconds to wake up. This is
-> normal on the free plan. (Later you can add a cron pinger or upgrade.)
-
----
-
-## 🔐 Where each secret lives (quick reference)
-
-| Secret | Frontend? | Backend? | Notes |
-|--------|:--------:|:--------:|-------|
-| `SUPABASE_URL` | ✅ | ✅ | public, safe |
-| `SUPABASE_ANON_KEY` | ✅ | ✅ | public, safe |
-| `SUPABASE_SERVICE_ROLE_KEY` | ❌ | ✅ | **secret** — backend only |
-| `GOOGLE_CLIENT_ID / SECRET` | ❌ | ❌ | lives inside Supabase only |
-| `CLOUDINARY_API_SECRET` | ❌ | ✅ | **secret** — backend only |
+### 🎨 Experience
+- World-class, responsive UI (mobile / tablet / laptop)
+- Consistent design language across every screen
+- Skeleton loaders, empty states, inline validation, toasts
+- Light-only theme (no broken auto-dark inversion)
 
 ---
 
-## 🧩 Troubleshooting
+## 👥 Who it's for (personas)
 
-- **Google login shows "redirect_uri_mismatch"** → the URI in Google Cloud
-  (Step 2.3) must be **exactly** `https://YOUR-PROJECT.supabase.co/auth/v1/callback`.
-  Re-check for typos.
-- **After login it loops / goes nowhere** → you forgot Step 7.2 (Supabase Site URL
-  + Redirect URLs). Add your `FRONTEND_URL` there.
-- **App loads but every action fails / CORS error** → `CLIENT_ORIGIN` on the
-  backend (Step 7.1) doesn't match your frontend URL, or `VITE_API_BASE` is wrong.
-- **Uploads fail** → re-check the three Cloudinary values on the **backend**.
-- **"Success. No rows returned."** in SQL editor is **correct** — that means the
-  schema ran fine.
-- **First action after a break is very slow** → free-tier backend waking up; wait
-  ~40 seconds and retry.
+- **🎓 The Job Seeker** — wants referrals at target companies without cold-messaging.
+- **🤝 The Helper** — happy to refer good people and get rewarded (and karma) for it.
+- **🔁 The Switcher** — both at once: gives referrals in their domain, seeks them elsewhere.
+- **🚀 The Networker** — builds trust score and reputation as a reliable connector.
+
+Most users are **all of these at different times** — which is exactly why the give-to-get
+loop works.
 
 ---
 
-## 📁 Project structure
+## 🎬 Real user journeys
+
+### Journey A — "I need a referral at Stripe"
+1. Priya signs up → gets 100 RP → completes profile.
+2. Posts a **request**: *Backend Engineer @ Stripe*, reward 80 RP, attaches her saved resume from the **vault**.
+3. Rahul (works at Stripe) sees it, refers her via Stripe's portal, **uploads the confirmation screenshot**.
+4. Priya opens the proof in the lightbox, approves → **80 RP moves to Rahul**, her request is fulfilled.
+
+### Journey B — "I can refer people at my company"
+1. Rahul posts an **opening**: *2 slots, SDET @ Stripe, 60 RP each*.
+2. Two seekers **grab** slots with their resumes.
+3. Rahul refers both, **uploads proof** on each claim.
+4. Each seeker **approves** → Rahul earns **120 RP total**, opening auto-fills.
+
+### Journey C — "I keep my resumes ready"
+1. Meera uploads 3 named resumes to her **vault** once.
+2. Every time she asks for or grabs a referral, she **picks one** — zero re-uploading.
+
+---
+
+## 🛡️ Trust & safety
+
+Refer Me! is designed so **honesty is the easy path** and cheating is self-defeating:
+
+- 🧾 **Proof-first** — no points move without an uploaded, approved proof.
+- ⚖️ **Reason-gated rejections** — rejecting requires a written reason (discourages
+  bad-faith refusals).
+- 📉 **Reputation staking** — false rejections and upheld reports lower trust; low-trust
+  accounts get throttled.
+- 🚫 **Self-dealing blocked** — you can't refer your own request or grab your own opening.
+- 🔑 **Row-Level Security** — users can only touch their own data at the database level.
+- 🧮 **Wallet guard** — you can never spend points you don't have.
+
+*(Planned: automated anti-collusion — reused-proof detection and mutual-referral flags.)*
+
+---
+
+## 💎 Premium
+
+Premium is about **convenience and reach**, never buying your way past helping others:
+
+| | Free (everyone equal) | Premium |
+|---|---|---|
+| Ask / give referrals | ✅ | ✅ |
+| Proof-backed fairness | ✅ | ✅ |
+| Daily limits | Standard | **Higher** |
+| Feed placement | Standard | **Priority** |
+| Advanced filters | — | ✅ |
+| Document vault size | Standard | **Larger** |
+| Verified Pro badge | — | ✅ |
+
+**Premium never gives free RP.** The core economy stays identical for everyone.
+
+---
+
+## 🧱 Tech overview
+
+| Layer | Tech |
+|-------|------|
+| Frontend | React + Vite (Render Static Site) |
+| Auth | Supabase Auth — Google only |
+| Database | Supabase Postgres + Row Level Security |
+| Files | Cloudinary (signed uploads) |
+| Backend | Node.js + Express (Render Web Service) |
+| Payments | Razorpay subscriptions (stub) |
+
+**Data model:** `profiles`, `referral_requests`, `referral_offers`, `user_documents`,
+`referral_openings`, `opening_claims`, `subscriptions` — with atomic security-definer
+RPCs handling every points transfer (no escrow, no ledger).
+
+*(Full folder tree, tables, and RPC list are in [`ARCHITECTURE`](#-project-structure) below.)*
+
+### 📁 Project structure
 
 ```
 refer-me/
-├── supabase/schema.sql      # tables, security rules, approve/reject logic
-├── server/                  # Node.js + Express API  →  Render Web Service
-│   ├── render.yaml
-│   └── src/{config,middleware,routes,index.js}
-└── client/                  # React + Vite website    →  Render Static Site
-    └── src/{lib,context,components,pages}
+├── supabase/   schema.sql · documents.sql · openings.sql
+├── server/     Express API — routes: profile, requests, offers,
+│               documents, openings, uploads, subscriptions
+└── client/     React app — pages, per-page CSS, auth context,
+                api + openingsApi helpers
 ```
 
 ---
 
-## 💎 Premium (optional, later)
+## 🚀 Setup & deployment
 
-Premium raises **limits/convenience only** — it **never gives free RP**, so the
-core stays equal for everyone. To make it real, create a **Razorpay** account,
-add a subscription button, and call `/api/subscriptions/activate` from the
-Razorpay **webhook** after a successful payment. Say the word and I'll wire it.
+Deploys entirely on **Render** (no local run needed). Full step-by-step:
+
+1. **Supabase** — create project → run `schema.sql`, `documents.sql`, `openings.sql` in
+   order → copy URL + anon + service-role keys.
+2. **Google OAuth** — create Web client → redirect URI
+   `https://YOUR-PROJECT.supabase.co/auth/v1/callback` → paste ID/secret into Supabase.
+3. **Cloudinary** — grab cloud name + API key + secret.
+4. **GitHub** — push the repo.
+5. **Render backend** (Web Service) — root `server`, add env vars (Supabase, Cloudinary,
+   `STARTER_RP=100`).
+6. **Render frontend** (Static Site) — root `client`, build `npm install && npm run build`,
+   publish `dist`, add `VITE_*` vars, add SPA rewrite `/* → /index.html`.
+7. **Wire URLs** — set backend `CLIENT_ORIGIN` and Supabase Site/Redirect URLs to the
+   frontend URL.
+
+> **Render free tier:** the API sleeps after ~15 min idle; first wake takes ~30–50s.
+
+**Secrets rule:** the `service_role` key and Cloudinary secret live **only** on the
+backend. The frontend uses the anon key.
+
+---
+
+## 🗺️ Roadmap
+
+- [ ] Unified marketplace: one page with a **Requests ⇄ Openings** toggle
+- [ ] Compact nav: grouped **Post ▾** and **Activity ▾** menus
+- [ ] 🔔 In-app **notifications** (new offers, grabs, proofs, approvals)
+- [ ] 🤖 Automated **anti-collusion** (reused-proof + mutual-referral detection)
+- [ ] 💳 Real **Razorpay** subscription + webhook
+- [ ] ⭐ Reviews / endorsements after a successful referral
+- [ ] 📈 Leaderboard of top helpers by trust score
+
+---
+
+## ❓ FAQ
+
+**Is Refer Me! free?**
+Yes. Everyone starts with 100 RP and can fully use the platform for free. Premium only
+adds convenience and higher limits.
+
+**Does Premium give me free points?**
+No — never. Points are earned only by genuinely helping people. The core stays equal.
+
+**What stops fake referrals?**
+Proof is mandatory before any points move, and rejections need a written reason. Trust
+score punishes bad actors automatically.
+
+**Who pays the points — the seeker or the referrer?**
+The **person receiving** the referral pays; the **person giving** it earns. Same in both
+Requests and Openings.
+
+**Do I have to re-upload my resume every time?**
+No — save it once in your **Document Vault** and reuse it anywhere.
+
+---
+
+<div align="center">
+
+**Built for professionals who help each other. 🤝**
+
+*Give-to-get. Proof-backed. Fair by design.*
+
+</div>
