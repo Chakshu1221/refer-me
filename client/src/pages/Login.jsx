@@ -86,15 +86,6 @@ export default function Login() {
               <span className="ico">🧾</span>
               <div><h4>Proof-backed, no fakes</h4><p>Every referral needs uploaded proof before points move.</p></div>
             </div>
-            <div className="auth-feat">
-              <span className="ico">⚡</span>
-              <div><h4>Instant, transparent rewards</h4><p>Approve a referral and points move on the spot.</p></div>
-            </div>
-          </div>
-
-          <div className="auth-stat">
-            <span className="rp">⚡</span>
-            <div><b>100 RP</b><span>welcome balance on sign-up</span></div>
           </div>
         </div>
 
