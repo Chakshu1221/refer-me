@@ -5,6 +5,7 @@ import NotificationBell from './NotificationBell.jsx';
 import '../pages/css/app.css';
 
 const LINKS = [
+  { to: '/', label: 'Home' },
   { to: '/browse', label: 'Browse' },
   { to: '/post', label: 'Post' },
   { to: '/my-offers', label: 'Activity' },
